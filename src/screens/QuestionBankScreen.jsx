@@ -4,13 +4,11 @@
  */
 import { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { QUESTION_BANK } from '../data/questionBank';
 import { useEffect } from 'react';
 
-const ALL_TOPICS = [...new Set(QUESTION_BANK.map(q => q.topic))];
-
 export default function QuestionBankScreen() {
-  const { saveScore } = useAppContext();
+  const { saveScore, questionBank } = useAppContext();
+  const ALL_TOPICS = [...new Set(questionBank.map(q => q.topic))];
   const [started,   setStarted]   = useState(false);
   const [filter,    setFilter]    = useState(null);
   const [qbList,    setQbList]    = useState([]);
@@ -20,8 +18,8 @@ export default function QuestionBankScreen() {
 
   function startBank(topic) {
     const filtered = topic
-      ? QUESTION_BANK.filter(q => q.topic === topic)
-      : [...QUESTION_BANK];
+      ? questionBank.filter(q => q.topic === topic)
+      : [...questionBank];
     setFilter(topic);
     setQbList([...filtered].sort(() => Math.random() - 0.5));
     setQbIdx(0);

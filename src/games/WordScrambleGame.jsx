@@ -4,12 +4,11 @@
  */
 import { useState, useRef, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { GCSE_WORDS } from '../data/words';
 
 function scramble(word) { return word.split('').sort(() => Math.random() - 0.5).join(''); }
 
 export default function WordScrambleGame() {
-  const { saveScore } = useAppContext();
+  const { saveScore, gcseWords } = useAppContext();
   const [wordObj,   setWordObj]   = useState(null);
   const [scrambled, setScrambled] = useState('');
   const [userInput, setUserInput] = useState('');
@@ -19,7 +18,8 @@ export default function WordScrambleGame() {
   const inputRef = useRef(null);
 
   function nextWord() {
-    const w = GCSE_WORDS[Math.floor(Math.random() * GCSE_WORDS.length)];
+    if (!gcseWords.length) return;
+    const w = gcseWords[Math.floor(Math.random() * gcseWords.length)];
     let s = scramble(w.word);
     while (s === w.word) s = scramble(w.word);
     setWordObj(w);

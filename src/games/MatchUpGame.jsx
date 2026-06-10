@@ -4,11 +4,10 @@
  */
 import { useState, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { QUESTION_BANK } from '../data/questionBank';
 import { callAI, parseJSON } from '../api/ai';
 
 export default function MatchUpGame() {
-  const { currentBoard, saveScore } = useAppContext();
+  const { currentBoard, saveScore, questionBank } = useAppContext();
   const [pairs,    setPairs]    = useState([]);
   const [terms,    setTerms]    = useState([]);  // shuffled
   const [defs,     setDefs]     = useState([]);  // shuffled
@@ -21,7 +20,7 @@ export default function MatchUpGame() {
   useEffect(() => { init(); }, []);
 
   async function init() {
-    const shortQs = QUESTION_BANK.filter(q => q.marks === 1 && q.a.length < 30);
+    const shortQs = questionBank.filter(q => q.marks === 1 && q.a.length < 30);
     if (shortQs.length >= 6 && Math.random() < 0.7) {
       const p = shortQs.sort(() => Math.random() - 0.5).slice(0, 6).map(q => ({ term: q.q, definition: q.a }));
       buildBoard(p);
@@ -36,7 +35,7 @@ export default function MatchUpGame() {
       );
       buildBoard(parseJSON(text).slice(0, 6));
     } catch {
-      const p = QUESTION_BANK.filter(q => q.marks === 1 && q.a.length < 30).sort(() => Math.random() - 0.5).slice(0, 6).map(q => ({ term: q.q, definition: q.a }));
+      const p = questionBank.filter(q => q.marks === 1 && q.a.length < 30).sort(() => Math.random() - 0.5).slice(0, 6).map(q => ({ term: q.q, definition: q.a }));
       buildBoard(p);
     }
     setLoading(false);

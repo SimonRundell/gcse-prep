@@ -4,7 +4,6 @@
  */
 import { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { BOARDS, SPEC, AO_DESC, SUBJECT_LABELS, BOARD_COLORS } from '../data/boards';
 import { callAI, parseJSON } from '../api/ai';
 import SourceBar from '../components/SourceBar';
 import FeedbackCard from '../components/FeedbackCard';
@@ -23,7 +22,7 @@ function rnd(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function qHtml(t) { return (t||'').replace(/\\n/g,'\n').split('\n').map(l=>`<p style="margin-bottom:5px">${l}</p>`).join(''); }
 
 export default function MockScreen() {
-  const { currentBoard } = useAppContext();
+  const { currentBoard, boardsData, specData, aoDesc, subjectLabels, boardColors } = useAppContext();
   const [started,   setStarted]   = useState(false);
   const [mockIdx,   setMockIdx]   = useState(0);
   const [question,  setQuestion]  = useState(null);
@@ -43,10 +42,10 @@ export default function MockScreen() {
     setQuestion(null); setFeedback(null); setAnswer('');
     setLoadingQ(true);
     const { subject, topic, idx: stIdx } = MOCK_SET[idx];
-    const st = BOARDS[currentBoard][subject][topic][stIdx];
-    const marks = rnd(st.marks);
-    const tier  = rnd(st.tiers);
-    const spec  = SPEC[currentBoard][subject];
+    const st = boardsData[currentBoard]?.[subject]?.[topic]?.[stIdx] || {};
+    const marks = rnd(st.marks || [2]);
+    const tier  = rnd(st.tiers || ['Foundation']);
+    const spec  = specData[currentBoard]?.[subject];
     let prompt = `Exam board: ${currentBoard}\nSpec: ${spec}\nPaper: ${st.paper}\nQ ref: ${st.qRef}\nMarks: ${marks}\nTier: ${tier}\nAOs: ${st.aos.join(', ')}\nCalculator: ${st.calc}\nTopic: ${st.key}\n`;
     if (subject === 'maths') prompt += 'Use realistic numbers. Label multi-part a) b) c). No answers.';
     else if (subject === 'language') prompt += 'Include extract for reading Qs.';
@@ -65,12 +64,12 @@ export default function MockScreen() {
     if (!answer.trim()) { alert('Write an answer first!'); return; }
     setLoadingFb(true);
     const { subject, topic, idx: stIdx } = MOCK_SET[mockIdx];
-    const st  = BOARDS[currentBoard][subject][topic][stIdx];
-    const aoD = st.aos.map(a => `${a}: ${AO_DESC[a] || a}`).join('; ');
+    const st  = boardsData[currentBoard]?.[subject]?.[topic]?.[stIdx] || {};
+    const aoD = (st.aos || []).map(a => `${a}: ${aoDesc[a] || a}`).join('; ');
     try {
       const text = await callAI(
         `You are an experienced ${currentBoard} GCSE examiner. Mark responses accurately. Return JSON only.`,
-        `Board: ${currentBoard}\nSpec: ${SPEC[currentBoard][subject]}\nPaper: ${st.paper} — ${st.qRef}\nAOs: ${aoD}\nMarks: ${question.marks}\nStudent answer: """${answer}"""\nReturn ONLY valid JSON:\n{"score":N,"outOf":${question.marks},"grade":"Excellent|Good|Satisfactory|Needs Improvement","feedback":"2–3 examiner sentences","aoBreakdown":[{"ao":"AO1","comment":"brief"}],"improvements":"1–2 specific improvements","modelAnswer":"top-band model answer"}`,
+        `Board: ${currentBoard}\nSpec: ${specData[currentBoard]?.[subject]}\nPaper: ${st.paper} — ${st.qRef}\nAOs: ${aoD}\nMarks: ${question.marks}\nStudent answer: """${answer}"""\nReturn ONLY valid JSON:\n{"score":N,"outOf":${question.marks},"grade":"Excellent|Good|Satisfactory|Needs Improvement","feedback":"2–3 examiner sentences","aoBreakdown":[{"ao":"AO1","comment":"brief"}],"improvements":"1–2 specific improvements","modelAnswer":"top-band model answer"}`,
         1200
       );
       setFeedback(parseJSON(text));
@@ -86,8 +85,8 @@ export default function MockScreen() {
   }
 
   const pct = (mockIdx / MOCK_SET.length) * 100;
-  const info = question ? SUBJECT_LABELS[question._subject] : null;
-  const boardColor = BOARD_COLORS[currentBoard];
+  const info = question ? subjectLabels[question._subject] : null;
+  const boardColor = boardColors[currentBoard];
 
   if (mockIdx >= MOCK_SET.length && started) {
     return (
@@ -124,9 +123,9 @@ export default function MockScreen() {
               <div className="q-area">
                 <SourceBar
                   cols={[
-                    { label: 'Spec',  value: SPEC[currentBoard][question._subject] },
-                    { label: 'Paper', value: BOARDS[currentBoard][question._subject][question._topic][question._stIdx].paper },
-                    { label: 'AOs',   value: <>{BOARDS[currentBoard][question._subject][question._topic][question._stIdx].aos.map(a => <span key={a} className="ao-pill">{a}</span>)}</> },
+                    { label: 'Spec',  value: specData[currentBoard]?.[question._subject] },
+                    { label: 'Paper', value: boardsData[currentBoard]?.[question._subject]?.[question._topic]?.[question._stIdx]?.paper },
+                    { label: 'AOs',   value: <>{(boardsData[currentBoard]?.[question._subject]?.[question._topic]?.[question._stIdx]?.aos || []).map(a => <span key={a} className="ao-pill">{a}</span>)}</> },
                   ]}
                   badge={{ label: currentBoard, color: boardColor }}
                 />

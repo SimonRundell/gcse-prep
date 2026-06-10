@@ -4,12 +4,10 @@
  */
 import { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { SUBJECT_LABELS } from '../data/boards';
-import { QUESTION_BANK } from '../data/questionBank';
 import { callAI, parseJSON } from '../api/ai';
 
 export default function FlashcardGame() {
-  const { currentBoard, saveScore } = useAppContext();
+  const { currentBoard, saveScore, subjectLabels, questionBank } = useAppContext();
   const [phase,    setPhase]    = useState('pick');   // 'pick' | 'playing' | 'done'
   const [cards,    setCards]    = useState([]);
   const [cardIdx,  setCardIdx]  = useState(0);
@@ -20,7 +18,7 @@ export default function FlashcardGame() {
   const [deckLabel,setDeckLabel]= useState('');
 
   function loadBankDeck() {
-    const deck = QUESTION_BANK
+    const deck = questionBank
       .filter(q => q.a.length < 60)
       .sort(() => Math.random() - 0.5)
       .slice(0, 12)
@@ -33,11 +31,11 @@ export default function FlashcardGame() {
 
   async function loadAIDeck(subject) {
     setLoading(true);
-    setDeckLabel(`${currentBoard} · ${SUBJECT_LABELS[subject].label}`);
+    setDeckLabel(`${currentBoard} · ${subjectLabels[subject]?.label || subject}`);
     try {
       const text = await callAI(
         'You are a GCSE revision expert. Generate flashcards. Return ONLY valid JSON array, no markdown.',
-        `Board: ${currentBoard}\nSubject: ${SUBJECT_LABELS[subject].label}\nGenerate 10 flashcards for GCSE ${SUBJECT_LABELS[subject].label}.\nReturn ONLY a JSON array:\n[{"front":"term or question","back":"definition or answer","category":"topic name"}]`,
+        `Board: ${currentBoard}\nSubject: ${subjectLabels[subject]?.label || subject}\nGenerate 10 flashcards for GCSE ${subjectLabels[subject]?.label || subject}.\nReturn ONLY a JSON array:\n[{"front":"term or question","back":"definition or answer","category":"topic name"}]`,
         1000
       );
       const deck = parseJSON(text);

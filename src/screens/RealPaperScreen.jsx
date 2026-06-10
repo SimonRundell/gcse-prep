@@ -4,14 +4,13 @@
  */
 import { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { AQA_1F_BLUEPRINT } from '../data/blueprint';
 import { callAI, parseJSON } from '../api/ai';
 import SourceBar from '../components/SourceBar';
 
 function qHtml(t) { return (t||'').replace(/\\n/g,'\n').split('\n').map(l=>`<p style="margin-bottom:5px">${l}</p>`).join(''); }
 
 export default function RealPaperScreen() {
-  const { currentBoard } = useAppContext();
+  const { currentBoard, blueprint } = useAppContext();
   const [rpIdx,     setRpIdx]     = useState(0);
   const [started,   setStarted]   = useState(false);
   const [question,  setQuestion]  = useState(null);
@@ -22,10 +21,10 @@ export default function RealPaperScreen() {
   const [loadingFb, setLoadingFb] = useState(false);
 
   async function loadQ(idx) {
-    if (idx >= AQA_1F_BLUEPRINT.length) { setQuestion(null); return; }
+    if (idx >= blueprint.length) { setQuestion(null); return; }
     setQuestion(null); setFeedback(null); setAnswer('');
     setLoadingQ(true);
-    const bp = AQA_1F_BLUEPRINT[idx];
+    const bp = blueprint[idx];
     try {
       const text = await callAI(
         `You are an AQA GCSE Maths examiner. Generate a Foundation tier non-calculator question in the EXACT style described. Return ONLY valid JSON: {"question":"text with \\n breaks","marks":${bp.marks},"tier":"Foundation","hint":"one-line method hint"}`,
@@ -42,7 +41,7 @@ export default function RealPaperScreen() {
   async function submitAnswer() {
     if (!answer.trim()) { alert('Show your working first!'); return; }
     setLoadingFb(true);
-    const bp = AQA_1F_BLUEPRINT[rpIdx];
+    const bp = blueprint[rpIdx];
     try {
       const text = await callAI(
         'You are an AQA GCSE Maths examiner. Mark accurately with method marks. Return JSON only.',
@@ -67,7 +66,7 @@ export default function RealPaperScreen() {
     loadQ(0);
   }
 
-  if (rpIdx >= AQA_1F_BLUEPRINT.length && started) {
+  if (rpIdx >= blueprint.length && started) {
     return (
       <div id="screen-realpaper" className="screen active">
         <div className="practice-wrap">
@@ -75,7 +74,7 @@ export default function RealPaperScreen() {
             <div style={{ fontSize: '3rem' }}>🎓</div>
             <div className="section-title mt">Full paper complete!</div>
             <p style={{ color: 'var(--slate)', margin: '10px 0' }}>
-              You worked through all {AQA_1F_BLUEPRINT.length} question slots of the Nov 2024 1F structure.
+              You worked through all {blueprint.length} question slots of the Nov 2024 1F structure.
             </p>
             <button className="btn btn-primary mt" onClick={startPaper}>Run It Again</button>
           </div>
@@ -84,8 +83,8 @@ export default function RealPaperScreen() {
     );
   }
 
-  const bp = AQA_1F_BLUEPRINT[rpIdx];
-  const pct = (rpIdx / AQA_1F_BLUEPRINT.length) * 100;
+  const bp = blueprint[rpIdx] || {};
+  const pct = (rpIdx / blueprint.length) * 100;
 
   return (
     <div id="screen-realpaper" className="screen active">

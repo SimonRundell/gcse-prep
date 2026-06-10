@@ -3,11 +3,12 @@
  * @description Curated YouTube channel listings with topic chips.
  */
 import { useState } from 'react';
-import { VIDEO_CHANNELS } from '../data/videos';
+import { useAppContext } from '../context/AppContext';
 
 export default function VideoLessonsScreen() {
+  const { videoChannels } = useAppContext();
   const [tab, setTab] = useState('maths');
-  const channels = VIDEO_CHANNELS[tab];
+  const channels = videoChannels[tab] || [];
 
   return (
     <div id="screen-videos" className="screen active">

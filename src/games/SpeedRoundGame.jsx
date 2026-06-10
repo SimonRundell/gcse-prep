@@ -4,8 +4,6 @@
  */
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { QUESTION_BANK } from '../data/questionBank';
-import { AQA_1F_BLUEPRINT } from '../data/blueprint';
 import { callAI, parseJSON } from '../api/ai';
 
 const CIRCUMFERENCE = 2 * Math.PI * 36; // r=36
@@ -13,7 +11,7 @@ const CIRCUMFERENCE = 2 * Math.PI * 36; // r=36
 function normAns(s) { return s.toLowerCase().replace(/[^a-z0-9./]/g, ''); }
 
 export default function SpeedRoundGame() {
-  const { currentBoard, saveScore } = useAppContext();
+  const { currentBoard, saveScore, questionBank, blueprint } = useAppContext();
   const [phase,    setPhase]    = useState('intro'); // 'intro' | 'playing' | 'ended'
   const [timeLeft, setTimeLeft] = useState(60);
   const [score,    setScore]    = useState(0);
@@ -39,7 +37,7 @@ export default function SpeedRoundGame() {
   }, []);
 
   const loadQ = useCallback(async () => {
-    const shortBank = QUESTION_BANK.filter(q => q.marks <= 2);
+    const shortBank = questionBank.filter(q => q.marks <= 2);
     if (Math.random() < 0.7 && shortBank.length) {
       const q = shortBank[Math.floor(Math.random() * shortBank.length)];
       currentQ.current = q.q;
@@ -50,7 +48,7 @@ export default function SpeedRoundGame() {
       return;
     }
     const useBP  = currentBoard === 'AQA' && Math.random() < 0.6;
-    const bpItem = useBP ? AQA_1F_BLUEPRINT[Math.floor(Math.random() * AQA_1F_BLUEPRINT.length)] : null;
+    const bpItem = useBP ? blueprint[Math.floor(Math.random() * blueprint.length)] : null;
     const topicLine = bpItem
       ? `Base it on this topic: ${bpItem.topic}. Make it answerable in one short line.`
       : 'Generate a varied GCSE short-answer question about maths, English language or literature.';
@@ -68,7 +66,7 @@ export default function SpeedRoundGame() {
       setInput('');
       inputRef.current?.focus();
     } catch { /* continue silently */ }
-  }, [currentBoard]);
+  }, [currentBoard, questionBank, blueprint]);
 
   function endRound() {
     phaseRef.current = 'ended';

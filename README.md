@@ -47,4 +47,30 @@ All questions in the bank are **original**. The Real Paper Mode and Question Ban
 - [OCR past papers](https://www.ocr.org.uk/qualifications/past-paper-finder/)
 
 ## 📄 License
-MIT — see [LICENSE](LICENSE).
+
+Copyright (c) 2026 Becky Hingston and Simon Rundell, Exeter College Faculty of ITDD
+
+This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 
+4.0 International License (CC BY-NC-SA 4.0). see [LICENSE](LICENSE).
+
+You are free to:
+  Share  — copy and redistribute the material in any medium or format
+  Adapt  — remix, transform, and build upon the material
+
+Under the following terms:
+  Attribution     — You must give appropriate credit to the original authors
+                    (Becky Hingston and Simon Rundell, Exeter College Faculty of ITDD),
+                    provide a link to the license, and indicate if changes were made.
+                    You may do so in any reasonable manner, but not in any way that
+                    suggests the licensor endorses you or your use.
+
+  NonCommercial   — You may not use the material for commercial purposes.
+
+  ShareAlike      — If you remix, transform, or build upon the material, you must
+                    distribute your contributions under the same license as the original.
+
+  No additional   — You may not apply legal terms or technological measures that
+  restrictions      legally restrict others from doing anything the license permits.
+
+Full licence text: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
+

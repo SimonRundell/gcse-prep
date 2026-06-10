@@ -4,14 +4,13 @@
  */
 import { useState, useRef } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { AQA_1F_BLUEPRINT } from '../data/blueprint';
 import { callAI, parseJSON } from '../api/ai';
 
 const GRADES     = ['1','2','3','4','5','6','7','8','9'];
 const GRADE_REQS = [2, 2, 3, 3, 3, 4, 4, 4, 4];
 
 export default function BeatTheExaminerGame() {
-  const { currentBoard, saveScore } = useAppContext();
+  const { currentBoard, saveScore, blueprint } = useAppContext();
   const [phase,    setPhase]    = useState('intro');  // 'intro' | 'playing' | 'won' | 'lost'
   const [grade,    setGrade]    = useState(0);
   const [lives,    setLives]    = useState(3);
@@ -37,7 +36,7 @@ export default function BeatTheExaminerGame() {
     const g    = gradeRef.current;
     const diff = g <= 2 ? 'easy Foundation' : g <= 5 ? 'mid Foundation/Higher' : g <= 7 ? 'difficult Higher' : 'very challenging Higher';
     const useBP  = currentBoard === 'AQA' && Math.random() < 0.5;
-    const bpItem = useBP ? AQA_1F_BLUEPRINT[Math.floor(Math.random() * AQA_1F_BLUEPRINT.length)] : null;
+    const bpItem = useBP ? blueprint[Math.floor(Math.random() * blueprint.length)] : null;
     const topicLine = bpItem
       ? `Base it on this real AQA Nov 2024 Paper 1F topic: ${bpItem.topic} (style: ${bpItem.style}).`
       : 'Generate a varied GCSE question (Maths, English Language or Literature).';
