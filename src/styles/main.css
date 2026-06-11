@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap'); */
 
 *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -20,10 +20,25 @@
 
 body { font-family: 'Inter', 'Noto Color Emoji', sans-serif; background: var(--navy); color: var(--white); min-height: 100vh; line-height: 1.6; }
 
-/* ── HEADER ── */
-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; border-bottom: 1px solid var(--border); background: rgba(15,27,45,0.97); position: sticky; top: 0; z-index: 200; backdrop-filter: blur(8px); gap: 12px; flex-wrap: wrap; }
-.logo { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; letter-spacing: -0.02em; }
+/* ── HEADER / NAVBAR ── */
+header { display: flex; align-items: center; padding: 8px 20px; border-bottom: 1px solid var(--border); background: rgba(15,27,45,0.97); position: sticky; top: 0; z-index: 200; backdrop-filter: blur(8px); }
+.logo { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; letter-spacing: -0.02em; background: none; border: none; cursor: pointer; color: var(--white); padding: 0; margin-right: 20px; flex-shrink: 0; display: flex; align-items: center; }
 .logo span { color: var(--teal); }
+.logo-img { width: 150px; height: auto; object-fit: contain; margin-top: 5px; margin-right: 8px; }
+.main-nav { display: flex; align-items: center; flex: 1; }
+.nav-group { position: relative; display: flex; align-items: center; }
+.nav-group-btn { display: flex; align-items: center; gap: 5px; padding: 8px 14px; background: none; border: none; border-bottom: 2px solid transparent; color: var(--slate); font-family: 'Inter', sans-serif; font-size: .84rem; font-weight: 600; cursor: pointer; transition: color .15s, border-color .15s; white-space: nowrap; }
+.nav-group-btn:hover { color: var(--white); }
+.nav-group.active .nav-group-btn { color: var(--white); }
+.nav-chevron { font-size: .62rem; transition: transform .15s; }
+.nav-group:hover .nav-chevron { transform: rotate(180deg); }
+.nav-dropdown { position: absolute; top: calc(100% + 1px); left: 0; background: #182d46; border: 1px solid var(--border); border-radius: 12px; padding: 6px; min-width: 210px; z-index: 250; box-shadow: 0 8px 32px rgba(0,0,0,.45); animation: dropIn .12s ease; }
+@keyframes dropIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+.nav-dropdown-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 12px; border-radius: 8px; background: none; border: none; color: var(--slate); font-family: 'Inter', sans-serif; font-size: .84rem; font-weight: 500; cursor: pointer; transition: all .12s; text-align: left; }
+.nav-dropdown-item:hover { background: var(--teal-dim); color: var(--white); }
+.nav-dropdown-item.active { background: var(--teal-dim); color: var(--teal); }
+.nav-dropdown-item .pill { margin-left: auto; }
+.header-right { display: flex; align-items: center; gap: 12px; margin-left: auto; padding-left: 16px; }
 .board-selector-btn { display: flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 7px 14px; cursor: pointer; font-size: 0.82rem; font-weight: 600; color: var(--white); transition: all .15s; }
 .board-selector-btn:hover { border-color: var(--teal); }
 .board-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--board-color); flex-shrink: 0; }
@@ -51,19 +66,12 @@ header { display: flex; align-items: center; justify-content: space-between; pad
 .btn-confirm:hover { background: #00e0bc; }
 
 /* ── LAYOUT ── */
-.shell { display: grid; grid-template-columns: 250px 1fr; min-height: calc(100vh - 57px); }
-aside { border-right: 1px solid var(--border); padding: 18px 12px; display: flex; flex-direction: column; gap: 3px; overflow-y: auto; }
-.sidebar-label { font-size: .64rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--slate); padding: 12px 12px 4px; }
-.nav-item { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 9px; cursor: pointer; font-size: .85rem; font-weight: 500; color: var(--slate); transition: all .15s; border: none; background: none; width: 100%; text-align: left; }
-.nav-item:hover { background: var(--teal-dim); color: var(--white); }
-.nav-item.active { background: var(--teal-dim); color: var(--teal); }
-.nav-item .icon { font-size: .95rem; display: inline-flex; align-items: center; justify-content: center; width: 18px; flex-shrink: 0; }
-.pill { font-size: .62rem; font-weight: 700; padding: 2px 6px; border-radius: 6px; margin-left: auto; }
+.pill { font-size: .62rem; font-weight: 700; padding: 2px 6px; border-radius: 6px; }
 .pill-m   { background: rgba(245,200,66,.15);  color: var(--gold); }
 .pill-el  { background: rgba(0,201,167,.12);   color: var(--teal); }
 .pill-lit { background: rgba(255,107,107,.12); color: var(--coral); }
 .pill-game{ background: rgba(167,139,250,.15); color: var(--purple); }
-main { padding: 26px 30px; overflow-y: auto; }
+.main-content { padding: 26px 30px; min-height: calc(100vh - 170px); }
 .screen { display: none; }
 .screen.active { display: block; }
 
@@ -287,9 +295,8 @@ main { padding: 26px 30px; overflow-y: auto; }
 .result-big { font-family: 'Syne', sans-serif; font-size: 3rem; font-weight: 800; margin: 12px 0; }
 
 @media (max-width: 768px) {
-  .shell { grid-template-columns: 1fr; }
-  aside  { display: none; }
-  main   { padding: 16px 14px; }
+  .main-nav { display: none; }
+  .main-content { padding: 16px 14px; }
   .section-grid, .games-grid { grid-template-columns: 1fr; }
   .topic-grid, .gte-options, .match-area { grid-template-columns: 1fr; }
   .home-hero h1 { font-size: 1.9rem; }
@@ -299,7 +306,7 @@ main { padding: 26px 30px; overflow-y: auto; }
 /* ================================================================
    ADMIN PANEL
    ================================================================ */
-.admin-link { font-size: .72rem; color: rgba(255,255,255,.2); text-decoration: none; padding: 5px 8px; border-radius: 4px; margin-left: auto; transition: color .15s; line-height: 1; }
+.admin-link { font-size: .72rem; color: rgba(255,255,255,.2); text-decoration: none; padding: 5px 8px; border-radius: 4px; transition: color .15s; line-height: 1; }
 .admin-link:hover { color: rgba(255,255,255,.5); }
 
 .admin-shell  { min-height: 100vh; background: var(--bg); color: #ccd6e0; font-family: 'Segoe UI', system-ui, sans-serif; }

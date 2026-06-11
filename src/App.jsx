@@ -6,7 +6,6 @@
  */
 import { AppProvider, useAppContext } from './context/AppContext';
 import Header            from './components/Header';
-import Sidebar           from './components/Sidebar';
 import BoardPickerModal  from './components/BoardPickerModal';
 import HomeScreen        from './screens/HomeScreen';
 import PracticeScreen    from './screens/PracticeScreen';
@@ -48,12 +47,9 @@ function AppShell() {
   return (
     <div id="app-root">
       <Header />
-      <div className="layout">
-        <Sidebar />
-        <main className="main-content">
-          {renderScreen()}
-        </main>
-      </div>
+      <main className="main-content">
+        {renderScreen()}
+      </main>
       <BoardPickerModal />
     </div>
   );
