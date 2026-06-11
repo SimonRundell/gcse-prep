@@ -7,7 +7,8 @@ import { checkAdminAuth } from '../api/resources';
 import AdminLogin from './AdminLogin';
 import AdminDashboard from './AdminDashboard';
 
-export default function AdminApp() {
+/** @param {{ onBack: () => void }} props */
+export default function AdminApp({ onBack }) {
     const [status, setStatus] = useState(null); // null = loading
 
     useEffect(() => { reload(); }, []);
@@ -26,7 +27,7 @@ export default function AdminApp() {
     }
 
     if (status.loggedIn) {
-        return <AdminDashboard onLogout={reload} />;
+        return <AdminDashboard onLogout={reload} onBack={onBack} />;
     }
 
     return <AdminLogin hasAdmin={status.hasAdmin} onSuccess={reload} />;

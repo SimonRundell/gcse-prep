@@ -9,17 +9,19 @@ import WordsTab       from './tabs/WordsTab';
 import VideosTab      from './tabs/VideosTab';
 import BlueprintTab   from './tabs/BlueprintTab';
 import BoardsTab      from './tabs/BoardsTab';
+import AdminUsersTab  from './tabs/AdminUsersTab';
 
 const TABS = [
-    { id: 'questions',  icon: 'layer-group',   label: 'Questions'  },
-    { id: 'words',      icon: 'font',           label: 'Words'      },
-    { id: 'videos',     icon: 'video',          label: 'Videos'     },
-    { id: 'blueprint',  icon: 'file-lines',     label: 'Blueprint'  },
-    { id: 'boards',     icon: 'school',         label: 'Boards'     },
+    { id: 'questions',   icon: 'layer-group',   label: 'Questions'   },
+    { id: 'words',       icon: 'font',           label: 'Words'       },
+    { id: 'videos',      icon: 'video',          label: 'Videos'      },
+    { id: 'blueprint',   icon: 'file-lines',     label: 'Blueprint'   },
+    { id: 'boards',      icon: 'school',         label: 'Boards'      },
+    { id: 'adminusers',  icon: 'user-shield',    label: 'Admin Users' },
 ];
 
-/** @param {{ onLogout: () => void }} props */
-export default function AdminDashboard({ onLogout }) {
+/** @param {{ onLogout: () => void, onBack: () => void }} props */
+export default function AdminDashboard({ onLogout, onBack }) {
     const [active, setActive] = useState('questions');
 
     async function logout() {
@@ -33,8 +35,9 @@ export default function AdminDashboard({ onLogout }) {
             case 'words':     return <WordsTab />;
             case 'videos':    return <VideosTab />;
             case 'blueprint': return <BlueprintTab />;
-            case 'boards':    return <BoardsTab />;
-            default:          return null;
+            case 'boards':      return <BoardsTab />;
+            case 'adminusers':  return <AdminUsersTab />;
+            default:            return null;
         }
     }
 
@@ -43,7 +46,7 @@ export default function AdminDashboard({ onLogout }) {
             <div className="admin-header">
                 <div className="admin-logo">GCSE<span>Prep</span></div>
                 <span style={{ color: 'var(--slate)', fontSize: '.82rem', marginRight: 'auto' }}>Admin Panel</span>
-                <a href="/" style={{ fontSize: '.8rem', color: 'var(--slate)', marginRight: 12, textDecoration: 'none' }}><i className="fa-solid fa-arrow-left" /> App</a>
+                <button onClick={onBack} style={{ background: 'none', border: 'none', fontSize: '.8rem', color: 'var(--slate)', marginRight: 12, cursor: 'pointer', padding: 0 }}><i className="fa-solid fa-arrow-left" /> App</button>
                 <button onClick={logout} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6, color: 'var(--slate)', padding: '4px 12px', cursor: 'pointer', fontSize: '.8rem' }}>
                     Sign out
                 </button>

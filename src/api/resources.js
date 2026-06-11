@@ -72,3 +72,25 @@ export function adminLogout() {
 export function adminSetup(email, password) {
     return axios.post('/api/admin_auth.php', { action: 'setup', email, password }).then(r => r.data);
 }
+
+// ---- Admin user management (requires active session) ---------------
+
+/** @returns {Promise<Array<{id: number, email: string, created_at: string}>>} */
+export function listAdminUsers() {
+    return axios.post('/api/admin_auth.php', { action: 'list' }).then(r => r.data);
+}
+
+/** @param {string} email @param {string} password */
+export function createAdminUser(email, password) {
+    return axios.post('/api/admin_auth.php', { action: 'create', email, password }).then(r => r.data);
+}
+
+/** @param {number} id @param {string} email @param {string} password — empty string = keep current */
+export function updateAdminUser(id, email, password) {
+    return axios.post('/api/admin_auth.php', { action: 'update', id, email, password }).then(r => r.data);
+}
+
+/** @param {number} id */
+export function deleteAdminUser(id) {
+    return axios.post('/api/admin_auth.php', { action: 'delete', id }).then(r => r.data);
+}

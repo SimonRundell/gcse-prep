@@ -7,6 +7,7 @@
 import { AppProvider, useAppContext } from './context/AppContext';
 import Header            from './components/Header';
 import BoardPickerModal  from './components/BoardPickerModal';
+import AdminApp          from './admin/AdminApp';
 import HomeScreen        from './screens/HomeScreen';
 import PracticeScreen    from './screens/PracticeScreen';
 import MockScreen        from './screens/MockScreen';
@@ -23,7 +24,11 @@ import MatchUpGame       from './games/MatchUpGame';
 
 /** Inner component so it can use context. */
 function AppShell() {
-  const { currentScreen, screenParams } = useAppContext();
+  const { currentScreen, screenParams, showScreen } = useAppContext();
+
+  if (currentScreen === 'admin') {
+    return <AdminApp onBack={() => showScreen('home')} />;
+  }
 
   function renderScreen() {
     switch (currentScreen) {

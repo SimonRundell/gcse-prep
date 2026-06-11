@@ -1,6 +1,6 @@
 /**
  * @file Header.jsx
- * @description Top navigation bar with dropdown menus for study topics, revision tools, and games.
+ * @description Top navigation bar with dropdown menus (desktop) and slide-in drawer (mobile).
  */
 import { useState, useRef } from 'react';
 import { useAppContext } from '../context/AppContext';
@@ -62,8 +62,11 @@ export default function Header() {
   } = useAppContext();
 
   const [openGroup, setOpenGroup] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const closeTimer = useRef(null);
   const boardColor = currentBoard ? (boardColors[currentBoard] || 'var(--teal)') : 'var(--teal)';
+
+  const closeMobileNav = () => setMenuOpen(false);
 
   const open  = (id) => { clearTimeout(closeTimer.current); setOpenGroup(id); };
   const close = ()   => { closeTimer.current = setTimeout(() => setOpenGroup(null), 150); };
@@ -84,49 +87,106 @@ export default function Header() {
   const isGroupActive = (group) => group.items.some(isItemActive);
 
   return (
-    <header>
-      <button className="logo" onClick={() => showScreen('home')}>
-        <img src="/assets/favicon.png" alt="" className="logo-img" />
-        GCSE<span>Prep</span>
-      </button>
+    <>
+      <header>
+        {/* Hamburger — visible on mobile only */}
+        <button className="hamburger" onClick={() => setMenuOpen(true)} aria-label="Open menu">
+          <i className="fa-solid fa-bars" />
+        </button>
 
-      <nav className="main-nav">
-        {NAV_GROUPS.map((group) => {
-          const active = isGroupActive(group);
-          return (
-            <div key={group.id} className={`nav-group${active ? ' active' : ''}`}
-              onMouseEnter={() => open(group.id)} onMouseLeave={close}>
-              <button className="nav-group-btn"
-                style={active ? { color: group.accent, borderBottomColor: group.accent } : undefined}>
-                {group.label} <span className="nav-chevron">▾</span>
+        <button className="logo" onClick={() => showScreen('home')}>
+          <img src="/assets/favicon.png" alt="" className="logo-img" />
+          GCSE<span>Prep</span>
+        </button>
+
+        <nav className="main-nav">
+          {NAV_GROUPS.map((group) => {
+            const active = isGroupActive(group);
+            return (
+              <div key={group.id} className={`nav-group${active ? ' active' : ''}`}
+                onMouseEnter={() => open(group.id)} onMouseLeave={close}>
+                <button className="nav-group-btn"
+                  style={active ? { color: group.accent, borderBottomColor: group.accent } : undefined}>
+                  {group.label} <span className="nav-chevron">▾</span>
+                </button>
+                {openGroup === group.id && (
+                  <div className="nav-dropdown">
+                    {group.items.map((item) => (
+                      <button key={item.label}
+                        className={`nav-dropdown-item${isItemActive(item) ? ' active' : ''}`}
+                        onClick={() => handleAction(item)}>
+                        <i className={`fa-solid fa-fw ${item.icon}`} />
+                        <span>{item.label}</span>
+                        {item.badge && <span className={`pill ${item.badgeClass}`}>{item.badge}</span>}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </nav>
+
+        <div className="header-right">
+          <button className="board-selector-btn" onClick={openBoardPicker}>
+            <div className="board-dot" style={{ background: boardColor }} />
+            <span>Board: </span>
+            <span className="board-name-display" style={{ color: boardColor }}>{currentBoard || '—'}</span>
+            <span style={{ color: 'var(--slate)', fontSize: '.75rem' }}>▾</span>
+          </button>
+          <button className="admin-link" onClick={() => showScreen('admin')}>
+            ADMIN
+          </button>
+        </div>
+      </header>
+
+      {/* Mobile slide-in drawer */}
+      {menuOpen && (
+        <div className="mobile-nav-overlay" onClick={closeMobileNav}>
+          <div className="mobile-nav-drawer" onClick={e => e.stopPropagation()}>
+            <div className="mobile-nav-head">
+              <button className="logo" onClick={() => { showScreen('home'); closeMobileNav(); }}>
+                GCSE<span>Prep</span>
               </button>
-              {openGroup === group.id && (
-                <div className="nav-dropdown">
+              <button className="mobile-nav-close" onClick={closeMobileNav} aria-label="Close menu">
+                <i className="fa-solid fa-xmark" />
+              </button>
+            </div>
+
+            <div className="mobile-nav-body">
+              {NAV_GROUPS.map((group) => (
+                <div key={group.id} className="mobile-nav-group">
+                  <div className="mobile-nav-group-lbl" style={{ color: group.accent }}>
+                    {group.label}
+                  </div>
                   {group.items.map((item) => (
-                    <button key={item.label}
-                      className={`nav-dropdown-item${isItemActive(item) ? ' active' : ''}`}
-                      onClick={() => handleAction(item)}>
+                    <button
+                      key={item.label}
+                      className={`mobile-nav-item${isItemActive(item) ? ' active' : ''}`}
+                      style={isItemActive(item) ? { color: group.accent } : undefined}
+                      onClick={() => { handleAction(item); closeMobileNav(); }}
+                    >
                       <i className={`fa-solid fa-fw ${item.icon}`} />
                       <span>{item.label}</span>
                       {item.badge && <span className={`pill ${item.badgeClass}`}>{item.badge}</span>}
                     </button>
                   ))}
                 </div>
-              )}
+              ))}
             </div>
-          );
-        })}
-      </nav>
 
-      <div className="header-right">
-        <button className="board-selector-btn" onClick={openBoardPicker}>
-          <div className="board-dot" style={{ background: boardColor }} />
-          <span>Board: </span>
-          <span className="board-name-display" style={{ color: boardColor }}>{currentBoard || '—'}</span>
-          <span style={{ color: 'var(--slate)', fontSize: '.75rem' }}>▾</span>
-        </button>
-        <a href="/admin" className="admin-link" title="Admin"><i className="fa-solid fa-gear" /></a>
-      </div>
-    </header>
+            <div className="mobile-nav-footer">
+              <button className="board-selector-btn" onClick={() => { openBoardPicker(); closeMobileNav(); }}>
+                <div className="board-dot" style={{ background: boardColor }} />
+                <span>Exam board: </span>
+                <span className="board-name-display" style={{ color: boardColor }}>
+                  {currentBoard || 'Not set'}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

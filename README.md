@@ -30,7 +30,7 @@ Built with React 18 + Vite 6 + PHP + MySQL. Questions are generated and marked b
 Curated links to the best free GCSE YouTube channels (Corbettmaths, Maths Genie, Cognito, Mr Bruff, Mr Salles, and more) with topic chips that jump straight to relevant searches.
 
 ### Admin Panel
-A protected admin panel at `/admin` provides full CRUD management of all content:
+A protected admin panel (accessed via the gear icon in the top-right of the header) provides full CRUD management of all content:
 - Question bank entries
 - Vocabulary words
 - Video channels and topics
@@ -184,8 +184,8 @@ gcse-prep/
 │   └── backup_gcse.sql     Database backup
 │
 ├── src/
-│   ├── main.jsx            Entry point — routes /admin to AdminApp, else App
-│   ├── App.jsx             Main app shell and screen router
+│   ├── main.jsx            Entry point — mounts App (single page, no URL routing)
+│   ├── App.jsx             Main app shell and screen router (admin rendered via state)
 │   ├── styles/main.css     Single stylesheet
 │   │
 │   ├── context/
@@ -195,7 +195,7 @@ gcse-prep/
 │   │   └── resources.js    Axios wrappers for the PHP REST endpoints
 │   │
 │   ├── components/         Shared UI components
-│   │   ├── Header.jsx      Top navigation bar with hover dropdowns
+│   │   ├── Header.jsx      Top navigation bar — hover dropdowns (desktop), slide-in drawer (mobile)
 │   │   ├── Sidebar.jsx     Secondary sidebar navigation
 │   │   ├── RichTextEditor.jsx  TipTap editor used for answers and admin prose
 │   │   ├── IconPicker.jsx  Font Awesome icon dropdown (admin)
@@ -221,7 +221,7 @@ gcse-prep/
 │   │   ├── WordScrambleGame.jsx
 │   │   └── MatchUpGame.jsx
 │   │
-│   ├── admin/              Admin panel (served at /admin)
+│   ├── admin/              Admin panel (state-driven, accessed via gear icon)
 │   │   ├── AdminApp.jsx
 │   │   ├── AdminLogin.jsx
 │   │   ├── AdminDashboard.jsx
@@ -231,7 +231,8 @@ gcse-prep/
 │   │       ├── WordsTab.jsx
 │   │       ├── VideosTab.jsx
 │   │       ├── BlueprintTab.jsx
-│   │       └── BoardsTab.jsx
+│   │       ├── BoardsTab.jsx
+│   │       └── AdminUsersTab.jsx  CRUD for admin_users table
 │   │
 │   └── data/               Static seed data (read by database/seed.php)
 │       ├── boards.js
@@ -288,9 +289,9 @@ gcse-prep/
 
 ## Admin Panel
 
-Navigate to `/admin` in the browser. On first run, if no admin account exists, you will be prompted to create one. Subsequent visits show a login form.
+Click the gear icon (top-right of the header) to open the admin panel. On first run, if no admin account exists, you will be prompted to create one. Subsequent visits show a login form. The admin panel renders full-screen within the SPA; use the **← App** button to return to the student view without logging out.
 
-The admin panel provides tabbed CRUD for: Questions, Words, Videos, Blueprint, and Boards. Board data is edited as raw JSON (the boards table stores complex nested spec and subject data in a JSON column); the board colour has its own picker.
+The admin panel provides tabbed CRUD for: Questions, Words, Videos, Blueprint, Boards, and Admin Users. Board data is edited as raw JSON (the boards table stores complex nested spec and subject data in a JSON column); the board colour has its own picker.
 
 Rows in the Questions, Words, Videos and Blueprint tables are reordered by dragging the grip handle; the new order is saved automatically. In the Questions tab, clear the filter box before dragging (reordering a filtered subset is disabled).
 
@@ -312,6 +313,40 @@ Rich text editing uses TipTap 3 (`@tiptap/react`, `@tiptap/starter-kit`, plus th
 ---
 
 ## Version History
+
+### 0.1.5
+
+#### Single-page application
+
+- Removed the `/admin` URL route. The admin panel is now rendered entirely within the root page via React state (`currentScreen === 'admin'`), eliminating the routing issues that affected live deployments. The gear icon in the header opens it; the **← App** button returns to the student view.
+
+#### Admin Users tab
+- Logged-in admins can now perform full CRUD on the `admin_users` table from a new **Admin Users** tab in the dashboard.
+- Create: email + password (min 8 characters) with confirmation field.
+- Edit: email always editable; password field is optional (blank = keep existing hash).
+- Delete: blocked if the target is the currently logged-in account, or if it is the last remaining admin.
+- Server-side validation and bcrypt hashing on all write operations.
+
+#### Navigation overhaul
+- Replaced the sidebar with a single sticky horizontal navbar containing five hover-activated dropdown groups: Maths, English Language, Literature, Revision and Games.
+- Each group uses its own accent colour; the active item and group are highlighted.
+- Logo image added to the left of the GCSEPrep wordmark; clicking it returns to the home screen.
+
+#### Responsive / mobile design
+- **Mobile navigation drawer** — a hamburger button (☰) appears in the header on screens ≤ 768 px. Tapping it opens a slide-in drawer from the left listing all nav groups and their items with large touch-friendly tap targets. The drawer closes on item selection, on backdrop tap, or via the ✕ button.
+- **Exam board selector** — moved into the mobile drawer footer so the header stays uncluttered on small screens.
+- **Logo** — scales from 150 px to 72 px on mobile to prevent header overflow.
+- **Leaderboard** — Game and Date columns are hidden on mobile, keeping a clean Rank / Name / Score layout.
+- **Word Scramble** — display word font size reduced from `2.8 rem` to `2 rem` with tighter letter-spacing to prevent horizontal overflow on narrow viewports.
+- **Flashcard** — card height reduced from 280 px to 220 px on mobile.
+
+#### CSS formatting
+- `src/styles/main.css` reformatted so every CSS property declaration sits on its own line, making the stylesheet easier to read and edit during development. No style values were changed.
+
+#### Database
+- `database/backup_gcse.sql` made MySQL-compatible by removing MariaDB-specific conditional comment syntax (`/*M!999999\-...*/` and `/*M!100616...*/`), which caused a SQL 1064 parse error on plain MySQL imports.
+
+---
 
 ### 0.1.3
 - Improved menu and logo
