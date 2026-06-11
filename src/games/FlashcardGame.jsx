@@ -68,13 +68,13 @@ export default function FlashcardGame() {
     return (
       <div id="screen-flashcard" className="screen active">
         <div className="game-wrap center" style={{ paddingTop: 32 }}>
-          <div style={{ fontSize: '3rem' }}>🎉</div>
+          <div style={{ fontSize: '3rem' }}><i className="fa-solid fa-champagne-glasses" /></div>
           <div className="section-title mt">Deck complete!</div>
           <p style={{ color: 'var(--slate)', margin: '10px 0' }}>
             Got: <strong style={{ color: 'var(--teal)' }}>{got}</strong> · Missed: <strong style={{ color: 'var(--coral)' }}>{miss}</strong>
           </p>
-          <button className="btn btn-primary mt" onClick={restart}>Restart</button>{' '}
-          <button className="btn btn-ghost" onClick={() => setPhase('pick')}>New subject</button>
+          <button type="button" className="btn btn-primary mt" onClick={restart}>Restart</button>{' '}
+          <button type="button" className="btn btn-ghost" onClick={() => setPhase('pick')}>New subject</button>
         </div>
       </div>
     );
@@ -87,23 +87,23 @@ export default function FlashcardGame() {
         <div className="game-wrap">
           <div className="game-header">
             <div>
-              <div className="game-title">🃏 Flashcards</div>
+              <div className="game-title"><i className="fa-solid fa-address-card" /> Flashcards</div>
               <div style={{ fontSize: '.78rem', color: 'var(--slate)' }}>{deckLabel}</div>
             </div>
             <div className="game-stats">
-              <div className="stat-box"><span className="stat-teal">✓</span><span className="stat-val stat-teal">{got}</span></div>
-              <div className="stat-box"><span className="stat-coral">✗</span><span className="stat-val stat-coral">{miss}</span></div>
+              <div className="stat-box"><span className="stat-teal"><i className="fa-solid fa-check" /></span><span className="stat-val stat-teal">{got}</span></div>
+              <div className="stat-box"><span className="stat-coral"><i className="fa-solid fa-xmark" /></span><span className="stat-val stat-coral">{miss}</span></div>
             </div>
           </div>
           <div className="flashcard-scene" onClick={flip}>
             <div className={`flashcard${flipped ? ' flipped' : ''}`}>
               <div className="card-face card-front">
-                <span className="face-label">📚 {card.category || 'Topic'}</span>
+                <span className="face-label"><i className="fa-solid fa-book" /> {card.category || 'Topic'}</span>
                 <div className="face-content">{card.front}</div>
                 <div className="face-sub">Tap to reveal</div>
               </div>
               <div className="card-face card-back">
-                <span className="face-label">✅ Answer</span>
+                <span className="face-label"><i className="fa-solid fa-circle-check" /> Answer</span>
                 <div className="face-content">{card.back}</div>
               </div>
             </div>
@@ -111,8 +111,8 @@ export default function FlashcardGame() {
           <p className="card-tap-hint">Tap card to flip · <span style={{ color: 'var(--slate)' }}>{cardIdx + 1} / {cards.length}</span></p>
           {flipped && (
             <div className="card-result-btns">
-              <button className="btn-got-it" onClick={() => result(true)}>✓ Got it</button>
-              <button className="btn-missed" onClick={() => result(false)}>✗ Missed</button>
+              <button type="button" className="btn-got-it" onClick={() => result(true)}><i className="fa-solid fa-check" /> Got it</button>
+              <button type="button" className="btn-missed" onClick={() => result(false)}><i className="fa-solid fa-xmark" /> Missed</button>
             </div>
           )}
         </div>
@@ -124,17 +124,17 @@ export default function FlashcardGame() {
     <div id="screen-flashcard" className="screen active">
       <div className="game-wrap">
         <div className="game-header">
-          <div className="game-title">🃏 Flashcards</div>
+          <div className="game-title"><i className="fa-solid fa-address-card" /> Flashcards</div>
         </div>
         <div className="section-sub">Pick a subject for your flashcards:</div>
         {loading
           ? <div className="loading"><div className="spinner" /> Generating flashcards…</div>
           : (
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-              <button className="btn btn-primary" onClick={loadBankDeck}>⚡ Instant Maths Deck (bank)</button>
-              <button className="btn btn-ghost"   onClick={() => loadAIDeck('maths')}>➗ Maths (AI)</button>
-              <button className="btn btn-ghost"   onClick={() => loadAIDeck('language')}>📖 English Language</button>
-              <button className="btn btn-ghost"   onClick={() => loadAIDeck('literature')}>🎭 English Literature</button>
+              <button type="button" className="btn btn-primary" onClick={loadBankDeck}><i className="fa-solid fa-bolt" /> Instant Maths Deck (bank)</button>
+              <button type="button" className="btn btn-ghost"   onClick={() => loadAIDeck('maths')}><i className="fa-solid fa-divide" /> Maths (AI)</button>
+              <button type="button" className="btn btn-ghost"   onClick={() => loadAIDeck('language')}><i className="fa-solid fa-book-open" /> English Language</button>
+              <button type="button" className="btn btn-ghost"   onClick={() => loadAIDeck('literature')}><i className="fa-solid fa-masks-theater" /> English Literature</button>
             </div>
           )
         }

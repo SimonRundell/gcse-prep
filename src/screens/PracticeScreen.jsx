@@ -7,6 +7,7 @@ import { useAppContext } from '../context/AppContext';
 import { callAI, parseJSON } from '../api/ai';
 import SourceBar from '../components/SourceBar';
 import FeedbackCard from '../components/FeedbackCard';
+import RichTextEditor from '../components/RichTextEditor';
 
 function rnd(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
@@ -78,7 +79,7 @@ export default function PracticeScreen() {
       const aoD = st.aos.map(a => `${a}: ${aoDesc[a] || a}`).join('; ');
       const text = await callAI(
         `You are an experienced ${currentBoard} GCSE examiner. Mark responses accurately. Return JSON only.`,
-        `Board: ${currentBoard}\nSpec: ${specData[currentBoard]?.[subject]}\nPaper: ${st.paper} — ${st.qRef}\nAOs: ${aoD}\nMarks: ${question.marks}\nStudent answer: """${answer}"""\nReturn ONLY valid JSON:\n{"score":N,"outOf":${question.marks},"grade":"Excellent|Good|Satisfactory|Needs Improvement","feedback":"2–3 examiner sentences","aoBreakdown":[{"ao":"AO1","comment":"brief"}],"improvements":"1–2 specific improvements","modelAnswer":"top-band model answer"}`,
+        `Board: ${currentBoard}\nSpec: ${specData[currentBoard]?.[subject]}\nPaper: ${st.paper} — ${st.qRef}\nAOs: ${aoD}\nMarks: ${question.marks}\nStudent answer (HTML formatted): """${answer}"""\nReturn ONLY valid JSON:\n{"score":N,"outOf":${question.marks},"grade":"Excellent|Good|Satisfactory|Needs Improvement","feedback":"2–3 examiner sentences","aoBreakdown":[{"ao":"AO1","comment":"brief"}],"improvements":"1–2 specific improvements","modelAnswer":"top-band model answer"}`,
         1200
       );
       setFeedback(parseJSON(text));
@@ -112,17 +113,17 @@ export default function PracticeScreen() {
         {/* Subtopic picker */}
         <div className="topic-grid">
           {bankQs.length > 0 && (
-            <button
+            <button type="button"
               className={`topic-btn${bankMode ? ' selected' : ''}`}
               style={{ borderColor: 'rgba(230,57,70,.4)' }}
               onClick={startTopicBank}
             >
-              <span>🗂️ Quick-fire bank questions</span>
+              <span><i className="fa-solid fa-layer-group" /> Quick-fire bank questions</span>
               <span className="ref">{bankQs.length} instant questions · Nov 2024 1F structure</span>
             </button>
           )}
           {subtopics.map((st, i) => (
-            <button
+            <button type="button"
               key={i}
               className={`topic-btn${!bankMode && selectedIdx === i ? ' selected' : ''}`}
               onClick={() => { setBankMode(false); setSelectedIdx(i); loadQ(i); }}
@@ -152,7 +153,7 @@ export default function PracticeScreen() {
             {qError && (
               <div className="q-card">
                 <p style={{ color: 'var(--coral)' }}>{qError}</p>
-                <button className="btn btn-ghost" style={{ marginTop: 10 }} onClick={() => loadQ(selectedIdx)}>Retry</button>
+                <button type="button" className="btn btn-ghost" style={{ marginTop: 10 }} onClick={() => loadQ(selectedIdx)}>Retry</button>
               </div>
             )}
             {!loadingQ && question && (
@@ -175,19 +176,18 @@ export default function PracticeScreen() {
                     <span className="q-marks">[{question.marks} marks] · {question.tier}</span>
                   </div>
                   <div className="q-text" dangerouslySetInnerHTML={{ __html: qHtml(question.question) }} />
-                  <div className="hint-bar">💡 <span>{question.hint}</span></div>
-                  <textarea
-                    className="ans-box"
+                  <div className="hint-bar"><i className="fa-solid fa-lightbulb" /> <span>{question.hint}</span></div>
+                  <RichTextEditor
                     placeholder="Write your answer here…"
-                    style={{ minHeight: question.marks >= 20 ? 220 : question.marks >= 8 ? 160 : 100 }}
+                    minHeight={question.marks >= 20 ? 220 : question.marks >= 8 ? 160 : 100}
                     value={answer}
-                    onChange={e => setAnswer(e.target.value)}
+                    onChange={setAnswer}
                   />
                   <div className="btn-row" style={{ marginTop: 10 }}>
-                    <button className="btn btn-primary" onClick={() => submitAnswer(selectedIdx)} disabled={loadingFb}>
+                    <button type="button" className="btn btn-primary" onClick={() => submitAnswer(selectedIdx)} disabled={loadingFb}>
                       Submit Answer
                     </button>
-                    <button className="btn btn-ghost" onClick={() => loadQ(selectedIdx)}>New Question</button>
+                    <button type="button" className="btn btn-ghost" onClick={() => loadQ(selectedIdx)}>New Question</button>
                   </div>
                 </div>
                 {loadingFb && <div className="loading"><div className="spinner" /> Marking against {currentBoard} mark scheme…</div>}
@@ -211,12 +211,12 @@ function BankPanel({ qs, idx, score, revealed, onReveal, onGot, onMiss, onSkip, 
   if (idx >= qs.length) {
     return (
       <div className="q-card center">
-        <div style={{ fontSize: '2.5rem' }}>🎉</div>
+        <div style={{ fontSize: '2.5rem' }}><i className="fa-solid fa-champagne-glasses" /></div>
         <div className="section-title mt">Topic bank complete!</div>
         <p style={{ color: 'var(--slate)', margin: '8px 0' }}>
           Self-marked: <strong style={{ color: 'var(--teal)' }}>{score}</strong> / {qs.length}
         </p>
-        <button className="btn btn-primary mt" onClick={onRestart}>Go Again</button>
+        <button type="button" className="btn btn-primary mt" onClick={onRestart}>Go Again</button>
       </div>
     );
   }
@@ -237,19 +237,19 @@ function BankPanel({ qs, idx, score, revealed, onReveal, onGot, onMiss, onSkip, 
           <span className="q-marks">[{q.marks} mark{q.marks > 1 ? 's' : ''}] · Foundation</span>
         </div>
         <div className="q-text">{q.q}</div>
-        <textarea className="ans-box" placeholder="Work it out here (optional)…" style={{ minHeight: 80 }} />
+        <RichTextEditor key={idx} placeholder="Work it out here (optional)…" minHeight={80} />
         {!revealed && (
           <div className="btn-row" style={{ marginTop: 10 }}>
-            <button className="btn btn-primary" onClick={onReveal}>Reveal Answer</button>
-            <button className="btn btn-ghost"   onClick={onSkip}>Skip →</button>
+            <button type="button" className="btn btn-primary" onClick={onReveal}>Reveal Answer</button>
+            <button type="button" className="btn btn-ghost"   onClick={onSkip}>Skip <i className="fa-solid fa-arrow-right" /></button>
           </div>
         )}
         {revealed && (
           <>
             <div className="model-ans mt">{q.a}</div>
             <div className="btn-row" style={{ marginTop: 10 }}>
-              <button className="btn-got-it" onClick={onGot}>✓ Got it</button>
-              <button className="btn-missed" onClick={onMiss}>✗ Missed</button>
+              <button type="button" className="btn-got-it" onClick={onGot}><i className="fa-solid fa-check" /> Got it</button>
+              <button type="button" className="btn-missed" onClick={onMiss}><i className="fa-solid fa-xmark" /> Missed</button>
             </div>
           </>
         )}

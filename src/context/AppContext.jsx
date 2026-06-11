@@ -1,18 +1,11 @@
 /**
  * @file AppContext.jsx
  * @description Global app state: board selection, screen navigation, leaderboard scores,
- *              and all editable resource data (fetched from API, falls back to static files).
+ *              and all editable resource data fetched from the API on mount.
  */
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { fetchResource } from '../api/resources';
-
-// Static fallbacks — used until the API responds (or if API is unavailable)
-import { BOARD_COLORS as S_COLORS, SPEC as S_SPEC, SUBJECT_LABELS as S_SL, AO_DESC as S_AO, TOPIC_BANK_MAP as S_TBM, BOARDS as S_BOARDS } from '../data/boards';
-import { QUESTION_BANK as S_QS }   from '../data/questionBank';
-import { AQA_1F_BLUEPRINT as S_BP } from '../data/blueprint';
-import { GCSE_WORDS as S_WORDS }    from '../data/words';
-import { VIDEO_CHANNELS as S_VID }  from '../data/videos';
 
 const AppContext = createContext(null);
 
@@ -37,19 +30,19 @@ export function AppProvider({ children }) {
         JSON.parse(localStorage.getItem('gcseScores') || '[]')
     );
 
-    // ---- Live resource data (falls back to static imports) -------
-    const [questionBank,  setQuestionBank]  = useState(S_QS);
-    const [blueprint,     setBlueprint]     = useState(S_BP);
-    const [gcseWords,     setGcseWords]     = useState(S_WORDS);
-    const [videoChannels, setVideoChannels] = useState(S_VID);
-    const [boardColors,   setBoardColors]   = useState(S_COLORS);
-    const [boardsData,    setBoardsData]    = useState(S_BOARDS);
-    const [specData,      setSpecData]      = useState(S_SPEC);
-    const [subjectLabels, setSubjectLabels] = useState(S_SL);
-    const [aoDesc,        setAoDesc]        = useState(S_AO);
-    const [topicBankMap,  setTopicBankMap]  = useState(S_TBM);
+    // ---- Resource data — populated from API on mount -------------
+    const [resourcesLoading, setResourcesLoading] = useState(true);
+    const [questionBank,  setQuestionBank]  = useState([]);
+    const [blueprint,     setBlueprint]     = useState([]);
+    const [gcseWords,     setGcseWords]     = useState([]);
+    const [videoChannels, setVideoChannels] = useState({ maths: [], english: [] });
+    const [boardColors,   setBoardColors]   = useState({});
+    const [boardsData,    setBoardsData]    = useState({});
+    const [specData,      setSpecData]      = useState({});
+    const [subjectLabels, setSubjectLabels] = useState({});
+    const [aoDesc,        setAoDesc]        = useState({});
+    const [topicBankMap,  setTopicBankMap]  = useState({});
 
-    // Fetch all live resource data on mount
     useEffect(() => {
         async function loadAll() {
             try {
@@ -61,58 +54,55 @@ export function AppProvider({ children }) {
                     fetchResource('boards'),
                 ]);
 
-                // Questions
-                if (Array.isArray(qs) && qs.length) {
+                if (Array.isArray(qs)) {
                     setQuestionBank(qs.map(r => ({ slot: r.slot, topic: r.topic, q: r.question, a: r.answer, marks: r.marks })));
                 }
 
-                // Blueprint
-                if (Array.isArray(bp) && bp.length) {
+                if (Array.isArray(bp)) {
                     setBlueprint(bp.map(r => ({ q: r.q_ref, topic: r.topic, style: r.style, marks: r.marks })));
                 }
 
-                // Words
-                if (Array.isArray(words) && words.length) {
+                if (Array.isArray(words)) {
                     setGcseWords(words.map(r => ({ word: r.word, clue: r.clue, subject: r.subject })));
                 }
 
-                // Videos — rebuild VIDEO_CHANNELS shape { maths: [...], english: [...] }
-                if (Array.isArray(vids) && vids.length) {
+                if (Array.isArray(vids)) {
                     const channels = { maths: [], english: [] };
                     vids.forEach(r => {
-                        const ch = { name: r.name, emoji: r.emoji, bg: r.bg, url: r.url, desc: r.description, topics: r.topics || [] };
+                        const ch = { name: r.name, icon: r.icon || r.emoji, bg: r.bg, url: r.url, desc: r.description, topics: r.topics || [] };
                         if (r.subject === 'maths')   channels.maths.push(ch);
-                        if (r.subject === 'english')  channels.english.push(ch);
+                        if (r.subject === 'english') channels.english.push(ch);
                     });
                     setVideoChannels(channels);
                 }
 
-                // Boards — rebuild BOARD_COLORS, SPEC, BOARDS, plus config fields
-                if (boardsResp && Array.isArray(boardsResp.boards) && boardsResp.boards.length) {
+                if (boardsResp?.boards?.length) {
                     const colors = {}, spec = {}, boards = {};
                     boardsResp.boards.forEach(b => {
                         colors[b.board_code] = b.color;
-                        spec[b.board_code]   = b.data?.spec   || {};
+                        spec[b.board_code]   = b.data?.spec     || {};
                         boards[b.board_code] = b.data?.subjects || {};
                     });
                     setBoardColors(colors);
                     setSpecData(spec);
                     setBoardsData(boards);
                 }
+
                 if (boardsResp?.config) {
                     const { subject_labels, ao_desc, topic_bank_map } = boardsResp.config;
                     if (subject_labels) setSubjectLabels(subject_labels);
                     if (ao_desc)        setAoDesc(ao_desc);
                     if (topic_bank_map) setTopicBankMap(topic_bank_map);
                 }
-            } catch {
-                // Silently keep static fallback data
+            } catch (err) {
+                console.error('Failed to load resources from API:', err);
+            } finally {
+                setResourcesLoading(false);
             }
         }
         loadAll();
     }, []);
 
-    // Apply board colour CSS variable whenever the board or live colors change
     useEffect(() => {
         if (currentBoard && boardColors[currentBoard]) {
             document.documentElement.style.setProperty('--board-color', boardColors[currentBoard]);
@@ -191,7 +181,7 @@ export function AppProvider({ children }) {
         openBoardPicker, selectBoard, confirmBoard,
         showScreen, showPractice, startGame, initRealPaper, initQBank,
         saveScore, clearScores,
-        // Live resource data
+        resourcesLoading,
         questionBank, blueprint, gcseWords, videoChannels,
         boardColors, boardsData, specData, subjectLabels, aoDesc, topicBankMap,
     };

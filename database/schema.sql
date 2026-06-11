@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS video_channels (
   id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   subject     VARCHAR(20)  NOT NULL COMMENT 'maths | english',
   name        VARCHAR(100) NOT NULL,
-  emoji       VARCHAR(10),
+  emoji       VARCHAR(50),
   bg          VARCHAR(50),
   url         VARCHAR(500) NOT NULL,
   description TEXT,
@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS blueprint (
 CREATE TABLE IF NOT EXISTS boards (
   id         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   board_code VARCHAR(20)  NOT NULL UNIQUE,
-  color      VARCHAR(20)  NOT NULL,
+  color      VARCHAR(40)  NOT NULL,
   data       JSON         NOT NULL COMMENT 'keys: spec, subjects',
   created_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

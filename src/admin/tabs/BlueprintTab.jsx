@@ -1,11 +1,16 @@
 /**
  * @file BlueprintTab.jsx
  * @description CRUD interface for the AQA Foundation Paper 1 blueprint slots.
+ *              Rows are reordered by drag-and-drop (persisted to sort_order).
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { fetchResource, createResource, updateResource, deleteResource } from '../../api/resources';
+import { arrayMove, persistOrder } from '../reorder';
 
 const EMPTY = { q_ref: '', topic: '', style: '', marks: 1, sort_order: 0 };
+
+/** Full update payload for a row (the PHP endpoint overwrites every column). */
+const toPayload = r => ({ q_ref: r.q_ref, topic: r.topic, style: r.style, marks: r.marks });
 
 export default function BlueprintTab() {
     const [rows,   setRows]   = useState([]);
@@ -13,11 +18,13 @@ export default function BlueprintTab() {
     const [modal,  setModal]  = useState(null);
     const [form,   setForm]   = useState(EMPTY);
     const [saving, setSaving] = useState(false);
+    const dragId = useRef(null);
+    const [overId, setOverId] = useState(null);
 
     useEffect(() => { load(); }, []);
 
     async function load() { setLoading(true); setRows(await fetchResource('blueprint')); setLoading(false); }
-    function openAdd()     { setForm(EMPTY); setModal('add'); }
+    function openAdd()     { setForm({ ...EMPTY, sort_order: rows.length }); setModal('add'); }
     function openEdit(row) { setForm({ q_ref: row.q_ref, topic: row.topic, style: row.style, marks: row.marks, sort_order: row.sort_order }); setModal(row); }
     function close()       { setModal(null); }
 
@@ -36,12 +43,23 @@ export default function BlueprintTab() {
         load();
     }
 
+    async function handleDrop(targetId) {
+        setOverId(null);
+        if (dragId.current === null || dragId.current === targetId) return;
+        const from = rows.findIndex(r => r.id === dragId.current);
+        const to   = rows.findIndex(r => r.id === targetId);
+        if (from < 0 || to < 0) return;
+        const next = arrayMove(rows, from, to);
+        setRows(next);
+        setRows(await persistOrder('blueprint', next, toPayload));
+    }
+
     return (
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                 <div>
                     <strong style={{ color: '#fff' }}>AQA Foundation Paper 1 Blueprint</strong>
-                    <span style={{ color: 'var(--slate)', marginLeft: 8, fontSize: '.82rem' }}>{rows.length} slots</span>
+                    <span style={{ color: 'var(--slate)', marginLeft: 8, fontSize: '.82rem' }}>{rows.length} slots · drag rows to reorder</span>
                 </div>
                 <button className="btn-add" onClick={openAdd}>+ Add slot</button>
             </div>
@@ -50,10 +68,20 @@ export default function BlueprintTab() {
             </p>
             {loading ? <p style={{ color: 'var(--slate)' }}>Loading…</p> : (
                 <table className="admin-table">
-                    <thead><tr><th>Q ref</th><th>Topic</th><th>Style descriptor</th><th>Marks</th><th>Actions</th></tr></thead>
+                    <thead><tr><th aria-label="Reorder" /><th>Q ref</th><th>Topic</th><th>Style descriptor</th><th>Marks</th><th>Actions</th></tr></thead>
                     <tbody>
                         {rows.map(r => (
-                            <tr key={r.id}>
+                            <tr
+                                key={r.id}
+                                className={overId === r.id ? 'drag-over' : ''}
+                                draggable
+                                onDragStart={() => { dragId.current = r.id; }}
+                                onDragOver={e => { e.preventDefault(); setOverId(r.id); }}
+                                onDragLeave={() => setOverId(o => (o === r.id ? null : o))}
+                                onDrop={() => handleDrop(r.id)}
+                                onDragEnd={() => { dragId.current = null; setOverId(null); }}
+                            >
+                                <td className="drag-handle" aria-label="Drag to reorder"><i className="fa-solid fa-grip-vertical" /></td>
                                 <td><span style={{ background: 'rgba(245,200,66,.12)', color: 'var(--gold)', borderRadius: 4, padding: '2px 8px', fontSize: '.8rem', fontWeight: 600 }}>{r.q_ref}</span></td>
                                 <td style={{ fontSize: '.82rem' }}>{r.topic}</td>
                                 <td style={{ fontSize: '.78rem', color: 'var(--slate)', maxWidth: 260 }}>{r.style.slice(0, 80)}{r.style.length > 80 ? '…' : ''}</td>
@@ -88,10 +116,6 @@ export default function BlueprintTab() {
                         <div className="admin-field">
                             <label>Style descriptor (tells the AI how to generate the question)</label>
                             <textarea rows={4} value={form.style} onChange={e => setForm(f => ({ ...f, style: e.target.value }))} />
-                        </div>
-                        <div className="admin-field">
-                            <label>Sort order</label>
-                            <input type="number" value={form.sort_order} onChange={e => setForm(f => ({ ...f, sort_order: +e.target.value }))} />
                         </div>
                         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 }}>
                             <button onClick={close} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--slate)', padding: '7px 16px', cursor: 'pointer' }}>Cancel</button>

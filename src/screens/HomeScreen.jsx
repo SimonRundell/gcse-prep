@@ -3,12 +3,11 @@
  * @description Dashboard / home screen with hero text and section cards.
  */
 import { useAppContext } from '../context/AppContext';
-import { BOARD_COLORS, SPEC } from '../data/boards';
 
 export default function HomeScreen() {
-  const { currentBoard, openBoardPicker, showScreen, showPractice, initRealPaper, startGame } = useAppContext();
-  const color = currentBoard ? BOARD_COLORS[currentBoard] : 'var(--teal)';
-  const spec  = currentBoard ? SPEC[currentBoard] : null;
+  const { currentBoard, openBoardPicker, showScreen, showPractice, initRealPaper, startGame, boardColors, specData } = useAppContext();
+  const color = currentBoard ? (boardColors[currentBoard] || 'var(--teal)') : 'var(--teal)';
+  const spec  = currentBoard ? specData[currentBoard] : null;
 
   return (
     <div id="screen-home" className="screen active">

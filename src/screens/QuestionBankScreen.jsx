@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { useEffect } from 'react';
+import RichTextEditor from '../components/RichTextEditor';
 
 export default function QuestionBankScreen() {
   const { saveScore, questionBank } = useAppContext();
@@ -42,13 +43,13 @@ export default function QuestionBankScreen() {
     return (
       <div id="screen-qbank" className="screen active">
         <div className="practice-wrap">
-          <div className="section-title">🗂️ Question Bank</div>
+          <div className="section-title"><i className="fa-solid fa-layer-group" /> Question Bank</div>
           <div className="section-sub">100+ ready-made practice questions following the Nov 2024 Paper 1F structure — instant, no waiting. Reveal answers when you're ready.</div>
           <div style={{ marginBottom: 16 }}>
             <div style={{ fontSize: '.78rem', color: 'var(--slate)', marginBottom: 8, fontWeight: 600 }}>Filter by topic (or take them all on):</div>
             <div className="topic-chips">
               <span className="topic-chip" style={{ borderColor: 'var(--teal)', color: 'var(--teal)' }} onClick={() => startBank(null)}>
-                🎲 All {QUESTION_BANK.length} questions (shuffled)
+                <i className="fa-solid fa-dice" /> All {questionBank.length} questions (shuffled)
               </span>
               {ALL_TOPICS.map(t => (
                 <span key={t} className="topic-chip" onClick={() => startBank(t)}>{t}</span>
@@ -65,12 +66,12 @@ export default function QuestionBankScreen() {
       <div id="screen-qbank" className="screen active">
         <div className="practice-wrap">
           <div className="center" style={{ padding: '32px 0' }}>
-            <div style={{ fontSize: '3rem' }}>🗂️</div>
+            <div style={{ fontSize: '3rem' }}><i className="fa-solid fa-layer-group" /></div>
             <div className="section-title mt">Set complete!</div>
             <p style={{ color: 'var(--slate)', margin: '10px 0' }}>
               Self-marked: <strong style={{ color: 'var(--teal)' }}>{qbScore}</strong> / {qbList.length} correct
             </p>
-            <button className="btn btn-primary mt" onClick={handleComplete}>Choose Another Set</button>
+            <button type="button" className="btn btn-primary mt" onClick={handleComplete}>Choose Another Set</button>
           </div>
         </div>
       </div>
@@ -81,7 +82,7 @@ export default function QuestionBankScreen() {
   return (
     <div id="screen-qbank" className="screen active">
       <div className="practice-wrap">
-        <div className="section-title">🗂️ Question Bank</div>
+        <div className="section-title"><i className="fa-solid fa-layer-group" /> Question Bank</div>
         <div className="section-sub">100+ ready-made practice questions — reveal the answer when you're ready.</div>
         <div className="q-area">
           <div className="source-bar">
@@ -98,11 +99,11 @@ export default function QuestionBankScreen() {
               <span className="q-marks">[{q.marks} mark{q.marks > 1 ? 's' : ''}] · Foundation · Non-calc</span>
             </div>
             <div className="q-text">{q.q}</div>
-            <textarea className="ans-box" placeholder="Work it out here (optional)…" style={{ minHeight: 80 }} />
+            <RichTextEditor key={qbIdx} placeholder="Work it out here (optional)…" minHeight={80} />
             {!revealed && (
               <div className="btn-row" style={{ marginTop: 10 }}>
-                <button className="btn btn-primary" onClick={() => setRevealed(true)}>Reveal Answer</button>
-                <button className="btn btn-ghost" onClick={handleSkip}>Skip →</button>
+                <button type="button" className="btn btn-primary" onClick={() => setRevealed(true)}>Reveal Answer</button>
+                <button type="button" className="btn btn-ghost" onClick={handleSkip}>Skip <i className="fa-solid fa-arrow-right" /></button>
               </div>
             )}
             {revealed && (
@@ -110,8 +111,8 @@ export default function QuestionBankScreen() {
                 <div className="model-ans mt" style={{ animation: 'fadeIn .3s ease' }}>{q.a}</div>
                 <div style={{ fontSize: '.8rem', color: 'var(--slate)', marginTop: 12, fontWeight: 600 }}>Did you get it right?</div>
                 <div className="btn-row" style={{ marginTop: 8 }}>
-                  <button className="btn-got-it" onClick={handleGot}>✓ Got it</button>
-                  <button className="btn-missed" onClick={handleMiss}>✗ Missed it</button>
+                  <button type="button" className="btn-got-it" onClick={handleGot}><i className="fa-solid fa-check" /> Got it</button>
+                  <button type="button" className="btn-missed" onClick={handleMiss}><i className="fa-solid fa-xmark" /> Missed it</button>
                 </div>
               </>
             )}

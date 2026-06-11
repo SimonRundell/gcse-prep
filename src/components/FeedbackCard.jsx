@@ -4,19 +4,19 @@
  */
 
 /**
- * @param {{ feedback: object, board: string, onNext: Function, nextLabel?: string }} props
+ * @param {{ feedback: object, board: string, onNext: Function, nextLabel?: string|JSX.Element }} props
  */
 export default function FeedbackCard({ feedback: fb, board, onNext, nextLabel = 'Next Question' }) {
   const pct = fb.score / fb.outOf;
   const sc  = pct >= 0.75 ? 's-high' : pct >= 0.5 ? 's-mid' : 's-low';
-  const em  = pct >= 0.75 ? '✅' : pct >= 0.5 ? '🟡' : '❌';
+  const em  = pct >= 0.75 ? 'fa-circle-check' : pct >= 0.5 ? 'fa-circle-half-stroke' : 'fa-circle-xmark';
 
   return (
     <div className="fb-card">
       <div className="fb-score-row">
         <div className={`score-circle ${sc}`}>{fb.score}/{fb.outOf}</div>
         <div>
-          <div className="fb-label">{em} {fb.grade}</div>
+          <div className="fb-label"><i className={`fa-solid ${em}`} /> {fb.grade}</div>
           <div style={{ fontSize: '.73rem', color: 'var(--slate)' }}>{board} mark scheme</div>
         </div>
       </div>

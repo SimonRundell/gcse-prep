@@ -31,7 +31,9 @@ export default function SpeedRoundGame() {
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
 
   const showFeedback = useCallback((correct, modelAnswer) => {
-    setFbText(correct ? '✓ Correct! +1' : `✗ Answer: ${modelAnswer}`);
+    setFbText(correct
+      ? <><i className="fa-solid fa-check" /> Correct! +1</>
+      : <><i className="fa-solid fa-xmark" /> Answer: {modelAnswer}</>);
     setFbClass(correct ? 'speed-feedback correct-flash' : 'speed-feedback wrong-flash');
     setTimeout(() => { setFbText(''); setFbClass('speed-feedback'); }, 1200);
   }, []);
@@ -137,13 +139,13 @@ export default function SpeedRoundGame() {
     return (
       <div id="screen-speed" className="screen active">
         <div className="game-wrap center" style={{ paddingTop: 32 }}>
-          <div style={{ fontSize: '3rem' }}>⚡</div>
+          <div style={{ fontSize: '3rem' }}><i className="fa-solid fa-bolt" /></div>
           <div className="result-big" style={{ color: 'var(--gold)' }}>{score}</div>
           <div style={{ color: 'var(--slate)', marginBottom: 8 }}>questions answered</div>
           {score >= best && score > 0 && (
-            <div style={{ color: 'var(--teal)', fontWeight: 700, marginBottom: 16 }}>🏆 New personal best!</div>
+            <div style={{ color: 'var(--teal)', fontWeight: 700, marginBottom: 16 }}><i className="fa-solid fa-trophy" /> New personal best!</div>
           )}
-          <button className="btn btn-primary" onClick={startRound}>Play Again</button>
+          <button type="button" className="btn btn-primary" onClick={startRound}>Play Again</button>
         </div>
       </div>
     );
@@ -154,19 +156,19 @@ export default function SpeedRoundGame() {
       <div id="screen-speed" className="screen active">
         <div className="game-wrap">
           <div className="game-header">
-            <div className="game-title">⚡ Speed Round</div>
+            <div className="game-title"><i className="fa-solid fa-bolt" /> Speed Round</div>
             <div className="game-stats">
               <div className="stat-box">Score <span className="stat-val stat-gold">{score}</span></div>
               <div className="stat-box">Best <span className="stat-val stat-teal">{best}</span></div>
             </div>
           </div>
           <div className="speed-display center">
-            <div style={{ fontSize: '3rem', marginBottom: 12 }}>⚡</div>
+            <div style={{ fontSize: '3rem', marginBottom: 12 }}><i className="fa-solid fa-bolt" /></div>
             <div className="section-title">60 seconds.</div>
             <p style={{ color: 'var(--slate)', margin: '10px 0' }}>Answer as many {currentBoard} questions as you can before time runs out.</p>
             <div style={{ marginTop: 8, fontSize: '.8rem', color: 'var(--slate)' }}>Short answers only — key points score points!</div>
           </div>
-          <button className="btn btn-primary mt" style={{ width: '100%' }} onClick={startRound}>Start Round →</button>
+          <button type="button" className="btn btn-primary mt" style={{ width: '100%' }} onClick={startRound}>Start Round <i className="fa-solid fa-arrow-right" /></button>
         </div>
       </div>
     );
@@ -176,7 +178,7 @@ export default function SpeedRoundGame() {
     <div id="screen-speed" className="screen active">
       <div className="game-wrap">
         <div className="game-header">
-          <div className="game-title">⚡ Speed Round</div>
+          <div className="game-title"><i className="fa-solid fa-bolt" /> Speed Round</div>
           <div className="game-stats">
             <div className="stat-box">Score <span className="stat-val stat-gold">{score}</span></div>
             <div className="stat-box">Best <span className="stat-val stat-teal">{best}</span></div>

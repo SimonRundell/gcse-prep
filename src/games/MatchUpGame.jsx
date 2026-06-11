@@ -88,7 +88,7 @@ export default function MatchUpGame() {
     return (
       <div id="screen-match" className="screen active">
         <div className="game-wrap">
-          <div className="game-header"><div className="game-title">🧩 Match-Up</div></div>
+          <div className="game-header"><div className="game-title"><i className="fa-solid fa-puzzle-piece" /> Match-Up</div></div>
           <div className="loading"><div className="spinner" /> Generating match-up…</div>
         </div>
       </div>
@@ -99,7 +99,7 @@ export default function MatchUpGame() {
     return (
       <div id="screen-match" className="screen active">
         <div className="game-wrap center" style={{ paddingTop: 32 }}>
-          <div style={{ fontSize: '3rem' }}>🧩</div>
+          <div style={{ fontSize: '3rem' }}><i className="fa-solid fa-puzzle-piece" /></div>
           <div className="section-title mt">All matched!</div>
           <p style={{ color: 'var(--slate)', margin: '10px 0' }}>Errors: {errors}</p>
           <button className="btn btn-primary mt" onClick={init}>Play Again</button>
@@ -112,7 +112,7 @@ export default function MatchUpGame() {
     <div id="screen-match" className="screen active">
       <div className="game-wrap">
         <div className="game-header">
-          <div className="game-title">🧩 Match-Up</div>
+          <div className="game-title"><i className="fa-solid fa-puzzle-piece" /> Match-Up</div>
           <div className="game-stats">
             <div className="stat-box">Matched <span className="stat-val stat-teal">{matched.size}</span></div>
             <div className="stat-box">Errors  <span className="stat-val stat-coral">{errors}</span></div>

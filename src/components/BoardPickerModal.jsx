@@ -5,9 +5,9 @@
 import { useAppContext } from '../context/AppContext';
 
 const BOARDS_META = [
-  { name: 'AQA',     emoji: '🔴', code: '8300 · 8700 · 8702' },
-  { name: 'Edexcel', emoji: '🔵', code: '1MA1 · 1EN0 · 1ET0' },
-  { name: 'OCR',     emoji: '🟣', code: 'J560 · J351 · J352'  },
+  { name: 'AQA',     code: '8300 · 8700 · 8702' },
+  { name: 'Edexcel', code: '1MA1 · 1EN0 · 1ET0' },
+  { name: 'OCR',     code: 'J560 · J351 · J352'  },
 ];
 
 export default function BoardPickerModal() {
@@ -28,13 +28,13 @@ export default function BoardPickerModal() {
               data-board={b.name}
               onClick={() => selectBoard(b.name)}
             >
-              <div className="bc-logo">{b.emoji}</div>
+              <div className="bc-logo"><i className="fa-solid fa-circle" /></div>
               <div className="bc-name">{b.name}</div>
               <div className="bc-code">{b.code}</div>
             </div>
           ))}
         </div>
-        <button className="btn-confirm" onClick={confirmBoard}>Let's go →</button>
+        <button type="button" className="btn-confirm" onClick={confirmBoard}>Let's go <i className="fa-solid fa-arrow-right" /></button>
       </div>
     </div>
   );

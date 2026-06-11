@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { callAI, parseJSON } from '../api/ai';
 import SourceBar from '../components/SourceBar';
+import RichTextEditor from '../components/RichTextEditor';
 
 function qHtml(t) { return (t||'').replace(/\\n/g,'\n').split('\n').map(l=>`<p style="margin-bottom:5px">${l}</p>`).join(''); }
 
@@ -45,7 +46,7 @@ export default function RealPaperScreen() {
     try {
       const text = await callAI(
         'You are an AQA GCSE Maths examiner. Mark accurately with method marks. Return JSON only.',
-        `Question: ${qText.replace(/\\n/g,'\n')}\nMarks available: ${bp.marks}\nStudent answer: """${answer}"""\nReturn ONLY: {"score":N,"outOf":${bp.marks},"grade":"Excellent|Good|Satisfactory|Needs Improvement","feedback":"2 examiner sentences incl. method marks","modelAnswer":"worked solution"}`,
+        `Question: ${qText.replace(/\\n/g,'\n')}\nMarks available: ${bp.marks}\nStudent answer (HTML formatted): """${answer}"""\nReturn ONLY: {"score":N,"outOf":${bp.marks},"grade":"Excellent|Good|Satisfactory|Needs Improvement","feedback":"2 examiner sentences incl. method marks","modelAnswer":"worked solution"}`,
         800
       );
       setFeedback(parseJSON(text));
@@ -71,12 +72,12 @@ export default function RealPaperScreen() {
       <div id="screen-realpaper" className="screen active">
         <div className="practice-wrap">
           <div className="center" style={{ padding: '40px 0' }}>
-            <div style={{ fontSize: '3rem' }}>🎓</div>
+            <div style={{ fontSize: '3rem' }}><i className="fa-solid fa-graduation-cap" /></div>
             <div className="section-title mt">Full paper complete!</div>
             <p style={{ color: 'var(--slate)', margin: '10px 0' }}>
               You worked through all {blueprint.length} question slots of the Nov 2024 1F structure.
             </p>
-            <button className="btn btn-primary mt" onClick={startPaper}>Run It Again</button>
+            <button type="button" className="btn btn-primary mt" onClick={startPaper}>Run It Again</button>
           </div>
         </div>
       </div>
@@ -89,18 +90,18 @@ export default function RealPaperScreen() {
   return (
     <div id="screen-realpaper" className="screen active">
       <div className="practice-wrap">
-        <div className="section-title">📄 Real Paper Mode</div>
+        <div className="section-title"><i className="fa-solid fa-file-lines" /> Real Paper Mode</div>
         <div className="section-sub">Practise the structure of a real AQA paper — Nov 2024 Foundation Paper 1, question by question.</div>
         <div className="video-note">
-          📋 This mode follows the exact structure of the real <strong>AQA Nov 2024 Paper 1F (Non-Calculator)</strong> — same topics, same question order, same mark allocations. Each question is freshly generated in the style of that slot, so you can practise again and again.
+          <i className="fa-solid fa-clipboard-list" /> This mode follows the exact structure of the real <strong>AQA Nov 2024 Paper 1F (Non-Calculator)</strong> — same topics, same question order, same mark allocations. Each question is freshly generated in the style of that slot, so you can practise again and again.
         </div>
         {!started ? (
-          <button className="btn btn-primary" onClick={startPaper}>Start Paper →</button>
+          <button type="button" className="btn btn-primary" onClick={startPaper}>Start Paper <i className="fa-solid fa-arrow-right" /></button>
         ) : (
           <>
             <div className="mock-progress">
               <div className="progress-bar"><div className="progress-fill" style={{ width: pct + '%' }} /></div>
-              <span className="progress-text">{bp.q} of Q{AQA_1F_BLUEPRINT.length} · {bp.marks} mark{bp.marks>1?'s':''} · {bp.topic}</span>
+              <span className="progress-text">{bp.q} of Q{blueprint.length} · {bp.marks} mark{bp.marks>1?'s':''} · {bp.topic}</span>
             </div>
             {loadingQ && <div className="loading"><div className="spinner" /> Generating {bp.q}-style question…</div>}
             {!loadingQ && question && (
@@ -119,17 +120,16 @@ export default function RealPaperScreen() {
                     <span className="q-marks">[{bp.marks} marks] · Foundation · Non-calc</span>
                   </div>
                   <div className="q-text" dangerouslySetInnerHTML={{ __html: qHtml(question.question) }} />
-                  <div className="hint-bar">💡 <span>{question.hint}</span></div>
-                  <textarea
-                    className="ans-box"
+                  <div className="hint-bar"><i className="fa-solid fa-lightbulb" /> <span>{question.hint}</span></div>
+                  <RichTextEditor
                     placeholder="Show your working…"
-                    style={{ minHeight: 110 }}
+                    minHeight={110}
                     value={answer}
-                    onChange={e => setAnswer(e.target.value)}
+                    onChange={setAnswer}
                   />
                   <div className="btn-row" style={{ marginTop: 10 }}>
-                    <button className="btn btn-primary" onClick={submitAnswer} disabled={loadingFb}>Submit</button>
-                    <button className="btn btn-ghost" onClick={nextQ}>Skip →</button>
+                    <button type="button" className="btn btn-primary" onClick={submitAnswer} disabled={loadingFb}>Submit</button>
+                    <button type="button" className="btn btn-ghost" onClick={nextQ}>Skip <i className="fa-solid fa-arrow-right" /></button>
                   </div>
                 </div>
                 {loadingFb && <div className="loading"><div className="spinner" /> Marking…</div>}
@@ -147,7 +147,7 @@ export default function RealPaperScreen() {
                       <div className="model-ans" dangerouslySetInnerHTML={{ __html: (feedback.modelAnswer||'').replace(/\n/g,'<br>') }} />
                     </div>
                     <div className="btn-row" style={{ marginTop: 14 }}>
-                      <button className="btn btn-primary" onClick={nextQ}>Next Question →</button>
+                      <button type="button" className="btn btn-primary" onClick={nextQ}>Next Question <i className="fa-solid fa-arrow-right" /></button>
                     </div>
                   </div>
                 )}

@@ -43,7 +43,7 @@ export default function AdminDashboard({ onLogout }) {
             <div className="admin-header">
                 <div className="admin-logo">GCSE<span>Prep</span></div>
                 <span style={{ color: 'var(--slate)', fontSize: '.82rem', marginRight: 'auto' }}>Admin Panel</span>
-                <a href="/" style={{ fontSize: '.8rem', color: 'var(--slate)', marginRight: 12, textDecoration: 'none' }}>← App</a>
+                <a href="/" style={{ fontSize: '.8rem', color: 'var(--slate)', marginRight: 12, textDecoration: 'none' }}><i className="fa-solid fa-arrow-left" /> App</a>
                 <button onClick={logout} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6, color: 'var(--slate)', padding: '4px 12px', cursor: 'pointer', fontSize: '.8rem' }}>
                     Sign out
                 </button>

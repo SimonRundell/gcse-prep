@@ -13,7 +13,7 @@ export default function LeaderboardScreen() {
     return (
       <div id="screen-leaderboard" className="screen active">
         <div style={{ maxWidth: 680 }}>
-          <div className="section-title">🏆 Leaderboard</div>
+          <div className="section-title"><i className="fa-solid fa-trophy" /> Leaderboard</div>
           <div className="section-sub">Your personal high scores. Saved in this browser.</div>
           <div className="leaderboard"><div className="lb-empty">No scores yet — play some games!</div></div>
         </div>
@@ -32,7 +32,7 @@ export default function LeaderboardScreen() {
   return (
     <div id="screen-leaderboard" className="screen active">
       <div style={{ maxWidth: 680 }}>
-        <div className="section-title">🏆 Leaderboard</div>
+        <div className="section-title"><i className="fa-solid fa-trophy" /> Leaderboard</div>
         <div className="section-sub">Your personal high scores. Saved in this browser.</div>
 
         <div style={{ fontSize: '.8rem', fontWeight: 600, color: 'var(--teal)', marginBottom: 10 }}>Personal Bests</div>

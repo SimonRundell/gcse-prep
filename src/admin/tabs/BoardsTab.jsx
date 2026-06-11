@@ -4,6 +4,7 @@
  */
 import { useState, useEffect } from 'react';
 import { fetchResource, updateResource } from '../../api/resources';
+import RgbaPicker from '../../components/RgbaPicker';
 import axios from 'axios';
 
 export default function BoardsTab() {
@@ -27,7 +28,7 @@ export default function BoardsTab() {
     }
 
     function openEdit(row) {
-        setActive(row);
+        setActive({ ...row });
         setJson(JSON.stringify(row.data, null, 2));
         setJsonErr('');
     }
@@ -124,6 +125,10 @@ export default function BoardsTab() {
                 <div className="admin-modal-overlay" onClick={e => e.target === e.currentTarget && closeEdit()}>
                     <div className="admin-modal" style={{ width: 'min(800px, 95vw)' }}>
                         <h3>Edit board: {active.board_code}</h3>
+                        <div className="admin-field">
+                            <span className="admin-label">Board colour</span>
+                            <RgbaPicker value={active.color} onChange={color => setActive(a => ({ ...a, color }))} />
+                        </div>
                         <p style={{ color: 'var(--slate)', fontSize: '.78rem', margin: '0 0 12px' }}>
                             Edit the full JSON data for this board. The top-level keys must be <code>spec</code> and <code>subjects</code>.
                         </p>

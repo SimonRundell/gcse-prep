@@ -7,6 +7,7 @@ import { useAppContext } from '../context/AppContext';
 import { callAI, parseJSON } from '../api/ai';
 import SourceBar from '../components/SourceBar';
 import FeedbackCard from '../components/FeedbackCard';
+import RichTextEditor from '../components/RichTextEditor';
 
 const MOCK_SET = [
   { subject: 'maths',      topic: 'Number',      idx: 0 },
@@ -69,7 +70,7 @@ export default function MockScreen() {
     try {
       const text = await callAI(
         `You are an experienced ${currentBoard} GCSE examiner. Mark responses accurately. Return JSON only.`,
-        `Board: ${currentBoard}\nSpec: ${specData[currentBoard]?.[subject]}\nPaper: ${st.paper} — ${st.qRef}\nAOs: ${aoD}\nMarks: ${question.marks}\nStudent answer: """${answer}"""\nReturn ONLY valid JSON:\n{"score":N,"outOf":${question.marks},"grade":"Excellent|Good|Satisfactory|Needs Improvement","feedback":"2–3 examiner sentences","aoBreakdown":[{"ao":"AO1","comment":"brief"}],"improvements":"1–2 specific improvements","modelAnswer":"top-band model answer"}`,
+        `Board: ${currentBoard}\nSpec: ${specData[currentBoard]?.[subject]}\nPaper: ${st.paper} — ${st.qRef}\nAOs: ${aoD}\nMarks: ${question.marks}\nStudent answer (HTML formatted): """${answer}"""\nReturn ONLY valid JSON:\n{"score":N,"outOf":${question.marks},"grade":"Excellent|Good|Satisfactory|Needs Improvement","feedback":"2–3 examiner sentences","aoBreakdown":[{"ao":"AO1","comment":"brief"}],"improvements":"1–2 specific improvements","modelAnswer":"top-band model answer"}`,
         1200
       );
       setFeedback(parseJSON(text));
@@ -93,12 +94,12 @@ export default function MockScreen() {
       <div id="screen-mock" className="screen active">
         <div className="practice-wrap">
           <div className="center" style={{ padding: '40px 0' }}>
-            <div style={{ fontSize: '3rem' }}>🎉</div>
+            <div style={{ fontSize: '3rem' }}><i className="fa-solid fa-champagne-glasses" /></div>
             <div className="section-title mt">Mock Complete!</div>
             <p style={{ color: 'var(--slate)', marginTop: 8 }}>
               All {MOCK_SET.length} {currentBoard}-style questions done.
             </p>
-            <button className="btn btn-primary mt" onClick={startMock}>New Mock</button>
+            <button type="button" className="btn btn-primary mt" onClick={startMock}>New Mock</button>
           </div>
         </div>
       </div>
@@ -111,7 +112,7 @@ export default function MockScreen() {
         <div className="section-title">Mock Exam</div>
         <div className="section-sub">{currentBoard} · Mixed paper.</div>
         {!started ? (
-          <button className="btn btn-primary" onClick={startMock}>Start Mock →</button>
+          <button type="button" className="btn btn-primary" onClick={startMock}>Start Mock <i className="fa-solid fa-arrow-right" /></button>
         ) : (
           <>
             <div className="mock-progress">
@@ -135,21 +136,20 @@ export default function MockScreen() {
                     <span className="q-marks">[{question.marks} marks] · {question.tier}</span>
                   </div>
                   <div className="q-text" dangerouslySetInnerHTML={{ __html: qHtml(question.question) }} />
-                  <div className="hint-bar">💡 <span>{question.hint}</span></div>
-                  <textarea
-                    className="ans-box"
+                  <div className="hint-bar"><i className="fa-solid fa-lightbulb" /> <span>{question.hint}</span></div>
+                  <RichTextEditor
                     placeholder="Write your answer here…"
-                    style={{ minHeight: question.marks >= 20 ? 220 : question.marks >= 8 ? 160 : 100 }}
+                    minHeight={question.marks >= 20 ? 220 : question.marks >= 8 ? 160 : 100}
                     value={answer}
-                    onChange={e => setAnswer(e.target.value)}
+                    onChange={setAnswer}
                   />
                   <div className="btn-row" style={{ marginTop: 10 }}>
-                    <button className="btn btn-primary" onClick={submitAnswer} disabled={loadingFb}>Submit Answer</button>
+                    <button type="button" className="btn btn-primary" onClick={submitAnswer} disabled={loadingFb}>Submit Answer</button>
                   </div>
                 </div>
                 {loadingFb && <div className="loading"><div className="spinner" /> Marking…</div>}
                 {feedback && (
-                  <FeedbackCard feedback={feedback} board={currentBoard} onNext={nextQuestion} nextLabel="Next Question →" />
+                  <FeedbackCard feedback={feedback} board={currentBoard} onNext={nextQuestion} nextLabel={<>Next Question <i className="fa-solid fa-arrow-right" /></>} />
                 )}
               </div>
             )}

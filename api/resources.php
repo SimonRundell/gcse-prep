@@ -126,14 +126,14 @@ try {
             requireAuth();
             $topicsJson = json_encode($body['topics'] ?? [], JSON_UNESCAPED_UNICODE);
             if ($method === 'POST') {
-                $s = db()->prepare('INSERT INTO video_channels (subject, name, emoji, bg, url, description, topics, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
-                $s->execute([$body['subject']??'', $body['name']??'', $body['emoji']??'', $body['bg']??'', $body['url']??'', $body['description']??'', $topicsJson, (int)($body['sort_order']??0)]);
+                $s = db()->prepare('INSERT INTO video_channels (subject, name, icon, bg, url, description, topics, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+                $s->execute([$body['subject']??'', $body['name']??'', $body['icon']??'', $body['bg']??'', $body['url']??'', $body['description']??'', $topicsJson, (int)($body['sort_order']??0)]);
                 echo json_encode(['id' => (int)db()->lastInsertId()]);
                 break;
             }
             if ($method === 'PUT' && $id) {
-                $s = db()->prepare('UPDATE video_channels SET subject=?, name=?, emoji=?, bg=?, url=?, description=?, topics=?, sort_order=? WHERE id=?');
-                $s->execute([$body['subject']??'', $body['name']??'', $body['emoji']??'', $body['bg']??'', $body['url']??'', $body['description']??'', $topicsJson, (int)($body['sort_order']??0), $id]);
+                $s = db()->prepare('UPDATE video_channels SET subject=?, name=?, icon=?, bg=?, url=?, description=?, topics=?, sort_order=? WHERE id=?');
+                $s->execute([$body['subject']??'', $body['name']??'', $body['icon']??'', $body['bg']??'', $body['url']??'', $body['description']??'', $topicsJson, (int)($body['sort_order']??0), $id]);
                 echo json_encode(['ok' => true]);
                 break;
             }

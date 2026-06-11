@@ -42,7 +42,7 @@ export default function GamesHub() {
               <div className="game-meta">
                 <span className="diff-badge">{g.diff}</span>
                 <button className="play-btn" style={{ background: g.color }}>
-                  {g.id === 'leaderboard' ? 'View →' : 'Play →'}
+                  {g.id === 'leaderboard' ? 'View' : 'Play'} <i className="fa-solid fa-arrow-right" />
                 </button>
               </div>
             </div>

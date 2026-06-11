@@ -102,7 +102,7 @@ export default function BeatTheExaminerGame() {
               <div className="rung-grade" style={{ color: col }}>{g}</div>
               <div className="rung-bar"><div className="rung-fill" style={{ width: fillW + '%', background: fillC }} /></div>
               <div className="rung-req">
-                {i < currentGrade ? '✓ Passed' : i === currentGrade ? `${currentCorrect}/${GRADE_REQS[i]} correct` : `Need ${GRADE_REQS[i]} correct`}
+                {i < currentGrade ? <><i className="fa-solid fa-check" /> Passed</> : i === currentGrade ? `${currentCorrect}/${GRADE_REQS[i]} correct` : `Need ${GRADE_REQS[i]} correct`}
               </div>
             </div>
           );
@@ -115,10 +115,10 @@ export default function BeatTheExaminerGame() {
     return (
       <div id="screen-gte" className="screen active">
         <div className="game-wrap center" style={{ paddingTop: 40 }}>
-          <div style={{ fontSize: '3rem' }}>🏆</div>
+          <div style={{ fontSize: '3rem' }}><i className="fa-solid fa-trophy" /></div>
           <div className="result-big" style={{ color: 'var(--gold)' }}>Grade 9!</div>
           <p style={{ color: 'var(--slate)', margin: '8px 0' }}>You beat the examiner on every grade!</p>
-          <button className="btn btn-primary mt" onClick={reset}>Play Again</button>
+          <button type="button" className="btn btn-primary mt" onClick={reset}>Play Again</button>
         </div>
       </div>
     );
@@ -128,12 +128,12 @@ export default function BeatTheExaminerGame() {
     return (
       <div id="screen-gte" className="screen active">
         <div className="game-wrap center" style={{ paddingTop: 40 }}>
-          <div style={{ fontSize: '3rem' }}>💔</div>
+          <div style={{ fontSize: '3rem' }}><i className="fa-solid fa-heart-crack" /></div>
           <div className="section-title mt">Game Over</div>
           <p style={{ color: 'var(--slate)', margin: '10px 0' }}>
             You reached <strong style={{ color: 'var(--gold)' }}>Grade {GRADES[grade]}</strong>
           </p>
-          <button className="btn btn-primary mt" onClick={reset}>Try Again</button>
+          <button type="button" className="btn btn-primary mt" onClick={reset}>Try Again</button>
         </div>
       </div>
     );
@@ -144,10 +144,10 @@ export default function BeatTheExaminerGame() {
       <div id="screen-gte" className="screen active">
         <div className="game-wrap">
           <div className="game-header">
-            <div className="game-title">🎯 Beat the Examiner</div>
+            <div className="game-title"><i className="fa-solid fa-bullseye" /> Beat the Examiner</div>
             <div className="game-stats">
               <div className="stat-box">Grade <span className="stat-val stat-purple">{GRADES[grade]}</span></div>
-              <div className="stat-box">Lives <span className="lives-display">{'❤️'.repeat(3)}</span></div>
+              <div className="stat-box">Lives <span className="lives-display">{[0, 1, 2].map(i => <i key={i} className="fa-solid fa-heart" />)}</span></div>
             </div>
           </div>
           <div style={{ padding: '24px 0 12px' }}>
@@ -156,7 +156,7 @@ export default function BeatTheExaminerGame() {
             </p>
             <Ladder currentGrade={0} currentCorrect={0} lives={3} />
           </div>
-          <button className="btn btn-purple" style={{ width: '100%' }} onClick={start}>Start climbing →</button>
+          <button type="button" className="btn btn-purple" style={{ width: '100%' }} onClick={start}>Start climbing <i className="fa-solid fa-arrow-right" /></button>
         </div>
       </div>
     );
@@ -166,10 +166,10 @@ export default function BeatTheExaminerGame() {
     <div id="screen-gte" className="screen active">
       <div className="game-wrap">
         <div className="game-header">
-          <div className="game-title">🎯 Beat the Examiner</div>
+          <div className="game-title"><i className="fa-solid fa-bullseye" /> Beat the Examiner</div>
           <div className="game-stats">
             <div className="stat-box">Grade <span className="stat-val stat-purple">{GRADES[grade]}</span></div>
-            <div className="stat-box">Lives <span className="lives-display">{'❤️'.repeat(lives)}{'🖤'.repeat(3 - lives)}</span></div>
+            <div className="stat-box">Lives <span className="lives-display">{[0, 1, 2].map(i => <i key={i} className={`fa-solid fa-heart${i >= lives ? ' lost' : ''}`} />)}</span></div>
           </div>
         </div>
         <Ladder currentGrade={grade} currentCorrect={correct} lives={lives} />
@@ -185,7 +185,7 @@ export default function BeatTheExaminerGame() {
                   else if (i === chosen)      cls += ' wrong';
                 }
                 return (
-                  <button key={i} className={cls} disabled={chosen !== null} onClick={() => answer(i)}>
+                  <button type="button" key={i} className={cls} disabled={chosen !== null} onClick={() => answer(i)}>
                     {String.fromCharCode(65 + i)}) {opt}
                   </button>
                 );
@@ -193,7 +193,7 @@ export default function BeatTheExaminerGame() {
             </div>
             {chosen !== null && (
               <div style={{ marginTop: 12, padding: '10px 14px', background: 'rgba(255,255,255,.04)', borderRadius: 8, fontSize: '.82rem', color: '#ccd6e0', animation: 'fadeIn .3s ease' }}>
-                💡 {question.explanation}
+                <i className="fa-solid fa-lightbulb" /> {question.explanation}
               </div>
             )}
           </div>

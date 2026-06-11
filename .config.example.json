@@ -1,9 +1,14 @@
 {
-  "anthropicApiKey": "CLAUDE_API_KEY_HERE",
   "db": {
     "host": "localhost",
     "name": "gcse_prep",
     "user": "USER_NAME_HERE",
     "password": "PASSWORD_HERE"
+  },
+  "ai": {
+    "provider": "anthropic",
+    "endpoint": "https://api.anthropic.com/v1/messages",
+    "model": "claude-sonnet-4-6",
+    "apiKey": "CLAUDE_API_KEY_HERE"
   }
 }

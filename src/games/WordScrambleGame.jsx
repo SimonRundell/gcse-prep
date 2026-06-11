@@ -60,9 +60,9 @@ export default function WordScrambleGame() {
     : { color: 'var(--slate)' };
 
   const resultText = result === 'correct'
-    ? `✅ Correct! "${wordObj?.word}"`
+    ? <><i className="fa-solid fa-circle-check" /> Correct! "{wordObj?.word}"</>
     : result === 'wrong'
-    ? '✗ Not quite. Try again!'
+    ? <><i className="fa-solid fa-xmark" /> Not quite. Try again!</>
     : result === 'skipped'
     ? `Skipped — answer was: ${wordObj?.word}`
     : '';
@@ -71,16 +71,16 @@ export default function WordScrambleGame() {
     <div id="screen-scramble" className="screen active">
       <div className="game-wrap">
         <div className="game-header">
-          <div className="game-title">🔤 Word Scramble</div>
+          <div className="game-title"><i className="fa-solid fa-font" /> Word Scramble</div>
           <div className="game-stats">
             <div className="stat-box">Score <span className="stat-val stat-gold">{score}</span></div>
-            <div className="stat-box">Streak 🔥<span className="stat-val stat-coral">{streak}</span></div>
+            <div className="stat-box">Streak <i className="fa-solid fa-fire stat-coral" /><span className="stat-val stat-coral">{streak}</span></div>
           </div>
         </div>
         {wordObj && (
           <>
             <div className="scramble-word">{scrambled}</div>
-            <div className="scramble-clue">💡 {wordObj.clue} <span style={{ color: 'var(--slate)' }}>({wordObj.subject})</span></div>
+            <div className="scramble-clue"><i className="fa-solid fa-lightbulb" /> <span dangerouslySetInnerHTML={{ __html: wordObj.clue }} /> <span style={{ color: 'var(--slate)' }}>({wordObj.subject})</span></div>
             <input
               ref={inputRef}
               className="scramble-input"
@@ -93,8 +93,8 @@ export default function WordScrambleGame() {
             />
             {result && <div className="scramble-result" style={resultStyle}>{resultText}</div>}
             <div className="btn-row mt" style={{ justifyContent: 'center' }}>
-              <button className="btn btn-primary" onClick={check}>Check ✓</button>
-              <button className="btn btn-ghost"   onClick={skip}>Skip →</button>
+              <button type="button" className="btn btn-primary" onClick={check}>Check <i className="fa-solid fa-check" /></button>
+              <button type="button" className="btn btn-ghost"   onClick={skip}>Skip <i className="fa-solid fa-arrow-right" /></button>
             </div>
           </>
         )}
