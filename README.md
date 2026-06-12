@@ -123,11 +123,7 @@ mysql -u root -p -e "CREATE DATABASE gcse_prep CHARACTER SET utf8mb4 COLLATE utf
 mysql -u root -p gcse_prep < database/schema.sql
 ```
 
-> **Upgrading an existing 0.1.x database?** Run the one-off migration, which renames `video_channels.emoji` to `icon` (mapping stored emoji to Font Awesome classes) and widens `boards.color` for rgba values:
->
-> ```bash
-> mysql -u root -p gcse_prep < database/migrate_video_icons.sql
-> ```
+`schema.sql` creates all tables and inserts all seed data (question bank, vocabulary, video channels, exam blueprint, board configuration, and a default admin account).
 
 Grant your app user access:
 
@@ -136,17 +132,14 @@ GRANT ALL PRIVILEGES ON gcse_prep.* TO 'your_db_user'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
-### 4. Seed initial data
+> **Default admin account** created by the seed data:
+>
+> - Email: `admin@yourdomain.ac.uk`
+> - Password: `gc5ERe51oN!`
+>
+> Log in to the admin panel and change these credentials immediately after first run.
 
-Run the seed script to populate all tables from the static data files:
-
-```bash
-php database/seed.php
-```
-
-This inserts the question bank, vocabulary words, video channels, exam blueprint, and board configuration. It also creates the superadmin account (`simon@rundell.org.uk` — change the password in `database/seed.php` before running if needed).
-
-### 5. Point Apache at the project
+### 4. Point Apache at the project
 
 Add a virtual host or alias so Apache serves the project root. The simplest approach on a local machine is a symlink:
 
@@ -156,7 +149,7 @@ sudo ln -s /path/to/gcse-prep /var/www/html/gcse-prep
 
 The PHP files must be reachable at `http://localhost/api/*.php` for Vite's proxy to work.
 
-### 6. Start the dev server
+### 5. Start the dev server
 
 ```bash
 npm run dev
@@ -179,7 +172,6 @@ gcse-prep/
 │
 ├── database/
 │   ├── schema.sql          Full table definitions
-│   ├── seed.php            Populates tables from static data files
 │   ├── migrate_video_icons.sql  One-off 0.1.3 migration (emoji → icon, colour width)
 │   └── backup_gcse.sql     Database backup
 │
@@ -234,7 +226,7 @@ gcse-prep/
 │   │       ├── BoardsTab.jsx
 │   │       └── AdminUsersTab.jsx  CRUD for admin_users table
 │   │
-│   └── data/               Static seed data (read by database/seed.php)
+│   └── data/               Static JS data files (boards, questions, words, videos, blueprint)
 │       ├── boards.js
 │       ├── blueprint.js
 │       ├── questionBank.js
@@ -289,7 +281,7 @@ gcse-prep/
 
 ## Admin Panel
 
-Click the gear icon (top-right of the header) to open the admin panel. On first run, if no admin account exists, you will be prompted to create one. Subsequent visits show a login form. The admin panel renders full-screen within the SPA; use the **← App** button to return to the student view without logging out.
+Click the ADMIN link (top right) to open the admin panel. On first run, if no admin account exists, you will be prompted to create one. Subsequent visits show a login form. The admin panel renders full-screen within the SPA; use the **← App** button to return to the student view without logging out.
 
 The admin panel provides tabbed CRUD for: Questions, Words, Videos, Blueprint, Boards, and Admin Users. Board data is edited as raw JSON (the boards table stores complex nested spec and subject data in a JSON column); the board colour has its own picker.
 
