@@ -42,6 +42,16 @@ export function deleteResource(type, id) {
     return axios.delete(BASE, { params: { type, id } }).then(r => r.data);
 }
 
+/**
+ * Submit a batch of pre-validated rows for upsert. Returns inserted/updated/error counts.
+ * @param {string}   type   Resource type (questions | words | videos | blueprint).
+ * @param {object[]} rows   Array of payload objects ready for the database.
+ * @returns {Promise<{inserted: number, updated: number, errors: string[]}>}
+ */
+export function bulkImportResource(type, rows) {
+    return axios.post(BASE, { action: 'bulk_import', rows }, { params: { type } }).then(r => r.data);
+}
+
 // ---- Admin auth helpers -----------------------------------------
 
 /**

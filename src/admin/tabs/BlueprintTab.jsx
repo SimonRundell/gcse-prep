@@ -4,8 +4,10 @@
  *              Rows are reordered by drag-and-drop (persisted to sort_order).
  */
 import { useState, useEffect, useRef } from 'react';
-import { fetchResource, createResource, updateResource, deleteResource } from '../../api/resources';
+import { fetchResource, createResource, updateResource, deleteResource, bulkImportResource } from '../../api/resources';
 import { arrayMove, persistOrder } from '../reorder';
+import CsvImportModal from '../CsvImportModal';
+import { downloadCsv, CSV_SCHEMAS } from '../csvUtils';
 
 const EMPTY = { q_ref: '', topic: '', style: '', marks: 1, sort_order: 0 };
 
@@ -19,7 +21,8 @@ export default function BlueprintTab() {
     const [form,   setForm]   = useState(EMPTY);
     const [saving, setSaving] = useState(false);
     const dragId = useRef(null);
-    const [overId, setOverId] = useState(null);
+    const [overId,   setOverId]   = useState(null);
+    const [csvModal, setCsvModal] = useState(false);
 
     useEffect(() => { load(); }, []);
 
@@ -54,6 +57,17 @@ export default function BlueprintTab() {
         setRows(await persistOrder('blueprint', next, toPayload));
     }
 
+    async function handleCsvImport(rows) {
+        const res = await bulkImportResource('blueprint', rows);
+        await load();
+        return res;
+    }
+
+    function handleCsvExport() {
+        const s = CSV_SCHEMAS.blueprint;
+        downloadCsv('blueprint.csv', s.columns, rows.map(s.prepareExport));
+    }
+
     return (
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -61,7 +75,11 @@ export default function BlueprintTab() {
                     <strong style={{ color: '#fff' }}>AQA Foundation Paper 1 Blueprint</strong>
                     <span style={{ color: 'var(--slate)', marginLeft: 8, fontSize: '.82rem' }}>{rows.length} slots · drag rows to reorder</span>
                 </div>
-                <button className="btn-add" onClick={openAdd}>+ Add slot</button>
+                <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="btn-csv-export" onClick={handleCsvExport} disabled={!rows.length}><i className="fa-solid fa-download" /> Export CSV</button>
+                    <button className="btn-csv-import" onClick={() => setCsvModal(true)}><i className="fa-solid fa-upload" /> Import CSV</button>
+                    <button className="btn-add" onClick={openAdd}>+ Add slot</button>
+                </div>
             </div>
             <p style={{ color: 'var(--slate)', fontSize: '.8rem', marginBottom: 16 }}>
                 These slots define the question style used in Real Paper Mode for AQA. The AI generates fresh questions matching each slot's topic and style descriptor.
@@ -95,6 +113,14 @@ export default function BlueprintTab() {
                     </tbody>
                 </table>
             )}
+            {csvModal && (
+                <CsvImportModal
+                    type="blueprint"
+                    onImport={handleCsvImport}
+                    onClose={() => setCsvModal(false)}
+                />
+            )}
+
             {modal && (
                 <div className="admin-modal-overlay" onClick={e => e.target === e.currentTarget && close()}>
                     <div className="admin-modal">

@@ -30,7 +30,7 @@ Built with React 18 + Vite 6 + PHP + MySQL. Questions are generated and marked b
 Curated links to the best free GCSE YouTube channels (Corbettmaths, Maths Genie, Cognito, Mr Bruff, Mr Salles, and more) with topic chips that jump straight to relevant searches.
 
 ### Admin Panel
-A protected admin panel (accessed via the gear icon in the top-right of the header) provides full CRUD management of all content:
+A protected admin panel at `/admin` provides full CRUD management of all content:
 - Question bank entries
 - Vocabulary words
 - Video channels and topics
@@ -123,7 +123,11 @@ mysql -u root -p -e "CREATE DATABASE gcse_prep CHARACTER SET utf8mb4 COLLATE utf
 mysql -u root -p gcse_prep < database/schema.sql
 ```
 
-`schema.sql` creates all tables and inserts all seed data (question bank, vocabulary, video channels, exam blueprint, board configuration, and a default admin account).
+> **Upgrading an existing 0.1.x database?** Run the one-off migration, which renames `video_channels.emoji` to `icon` (mapping stored emoji to Font Awesome classes) and widens `boards.color` for rgba values:
+>
+> ```bash
+> mysql -u root -p gcse_prep < database/migrate_video_icons.sql
+> ```
 
 Grant your app user access:
 
@@ -132,14 +136,17 @@ GRANT ALL PRIVILEGES ON gcse_prep.* TO 'your_db_user'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
-> **Default admin account** created by the seed data:
->
-> - Email: `admin@yourdomain.ac.uk`
-> - Password: `gc5ERe51oN!`
->
-> Log in to the admin panel and change these credentials immediately after first run.
+### 4. Seed initial data
 
-### 4. Point Apache at the project
+Run the seed script to populate all tables from the static data files:
+
+```bash
+php database/seed.php
+```
+
+This inserts the question bank, vocabulary words, video channels, exam blueprint, and board configuration. It also creates the superadmin account (`simon@rundell.org.uk` — change the password in `database/seed.php` before running if needed).
+
+### 5. Point Apache at the project
 
 Add a virtual host or alias so Apache serves the project root. The simplest approach on a local machine is a symlink:
 
@@ -149,7 +156,7 @@ sudo ln -s /path/to/gcse-prep /var/www/html/gcse-prep
 
 The PHP files must be reachable at `http://localhost/api/*.php` for Vite's proxy to work.
 
-### 5. Start the dev server
+### 6. Start the dev server
 
 ```bash
 npm run dev
@@ -172,12 +179,13 @@ gcse-prep/
 │
 ├── database/
 │   ├── schema.sql          Full table definitions
+│   ├── seed.php            Populates tables from static data files
 │   ├── migrate_video_icons.sql  One-off 0.1.3 migration (emoji → icon, colour width)
 │   └── backup_gcse.sql     Database backup
 │
 ├── src/
-│   ├── main.jsx            Entry point — mounts App (single page, no URL routing)
-│   ├── App.jsx             Main app shell and screen router (admin rendered via state)
+│   ├── main.jsx            Entry point — routes /admin to AdminApp, else App
+│   ├── App.jsx             Main app shell and screen router
 │   ├── styles/main.css     Single stylesheet
 │   │
 │   ├── context/
@@ -187,7 +195,7 @@ gcse-prep/
 │   │   └── resources.js    Axios wrappers for the PHP REST endpoints
 │   │
 │   ├── components/         Shared UI components
-│   │   ├── Header.jsx      Top navigation bar — hover dropdowns (desktop), slide-in drawer (mobile)
+│   │   ├── Header.jsx      Top navigation bar with hover dropdowns
 │   │   ├── Sidebar.jsx     Secondary sidebar navigation
 │   │   ├── RichTextEditor.jsx  TipTap editor used for answers and admin prose
 │   │   ├── IconPicker.jsx  Font Awesome icon dropdown (admin)
@@ -213,20 +221,21 @@ gcse-prep/
 │   │   ├── WordScrambleGame.jsx
 │   │   └── MatchUpGame.jsx
 │   │
-│   ├── admin/              Admin panel (state-driven, accessed via gear icon)
+│   ├── admin/              Admin panel (served at /admin)
 │   │   ├── AdminApp.jsx
 │   │   ├── AdminLogin.jsx
 │   │   ├── AdminDashboard.jsx
-│   │   ├── reorder.js      Drag-and-drop ordering helpers (persist sort_order)
-│   │   └── tabs/           One tab component per resource type
+│   │   ├── CsvImportModal.jsx  Reusable three-stage CSV import modal
+│   │   ├── csvUtils.js         CSV parser, download helper, per-type schemas
+│   │   ├── reorder.js          Drag-and-drop ordering helpers (persist sort_order)
+│   │   └── tabs/               One tab component per resource type
 │   │       ├── QuestionsTab.jsx
 │   │       ├── WordsTab.jsx
 │   │       ├── VideosTab.jsx
 │   │       ├── BlueprintTab.jsx
-│   │       ├── BoardsTab.jsx
-│   │       └── AdminUsersTab.jsx  CRUD for admin_users table
+│   │       └── BoardsTab.jsx
 │   │
-│   └── data/               Static JS data files (boards, questions, words, videos, blueprint)
+│   └── data/               Static seed data (read by database/seed.php)
 │       ├── boards.js
 │       ├── blueprint.js
 │       ├── questionBank.js
@@ -274,6 +283,7 @@ gcse-prep/
 |--------|-----|-------------|
 | `POST` | `/api/admin_auth.php` | `action: login` / `logout` / `setup` |
 | `POST` | `/api/resources.php?type=<type>` | Create a resource record |
+| `POST` | `/api/resources.php?type=<type>` with `action: bulk_import` | Bulk upsert an array of rows from CSV import |
 | `PUT` | `/api/resources.php?type=<type>&id=<id>` | Update a resource record |
 | `DELETE` | `/api/resources.php?type=<type>&id=<id>` | Delete a resource record |
 
@@ -281,11 +291,13 @@ gcse-prep/
 
 ## Admin Panel
 
-Click the ADMIN link (top right) to open the admin panel. On first run, if no admin account exists, you will be prompted to create one. Subsequent visits show a login form. The admin panel renders full-screen within the SPA; use the **← App** button to return to the student view without logging out.
+Navigate to `/admin` in the browser. On first run, if no admin account exists, you will be prompted to create one. Subsequent visits show a login form.
 
-The admin panel provides tabbed CRUD for: Questions, Words, Videos, Blueprint, Boards, and Admin Users. Board data is edited as raw JSON (the boards table stores complex nested spec and subject data in a JSON column); the board colour has its own picker.
+The admin panel provides tabbed CRUD for: Questions, Words, Videos, Blueprint, and Boards. Board data is edited as raw JSON (the boards table stores complex nested spec and subject data in a JSON column); the board colour has its own picker.
 
 Rows in the Questions, Words, Videos and Blueprint tables are reordered by dragging the grip handle; the new order is saved automatically. In the Questions tab, clear the filter box before dragging (reordering a filtered subset is disabled).
+
+Every content tab (except Boards) also has **Export CSV** and **Import CSV** buttons. Export downloads the current table as a UTF-8 CSV that opens correctly in Excel. Import opens a three-stage modal: column guidance, a five-row preview for confirmation, and a results summary showing inserted, updated, and error counts. The expected column names for each type are shown in the modal, with required columns highlighted. For Videos, multiple topics are pipe-separated in a single cell (e.g. `Algebra|Fractions`).
 
 ---
 
@@ -306,39 +318,23 @@ Rich text editing uses TipTap 3 (`@tiptap/react`, `@tiptap/starter-kit`, plus th
 
 ## Version History
 
-### 0.1.5
+### 0.1.5 (2026-06-29)
 
-#### Single-page application
+Bulk CSV import and export for all four main content types (Questions, Words, Videos, Blueprint).
 
-- Removed the `/admin` URL route. The admin panel is now rendered entirely within the root page via React state (`currentScreen === 'admin'`), eliminating the routing issues that affected live deployments. The gear icon in the header opens it; the **← App** button returns to the student view.
+- **Export CSV** button on each tab downloads the current data as a UTF-8 CSV with BOM, ready to open directly in Excel.
+- **Import CSV** button opens a guided three-stage modal:
+  1. Column reference showing required (highlighted) and optional field names, plus guidance on upsert behaviour and the pipe-separated topics format for Videos.
+  2. Five-row preview of the parsed file for confirmation before committing.
+  3. Results summary: inserted, updated, and per-row error counts.
+- Handles Excel UTF-8 BOM, quoted fields, embedded commas, and multi-line cell content.
+- Upsert keys: `word + subject` (Words), `url` (Videos), `q_ref` (Blueprint). Questions always insert as new records.
+- New PHP function `handleBulkImport()` in `api/resources.php`; new `bulkImportResource()` in `src/api/resources.js`.
+- New shared files: `src/admin/CsvImportModal.jsx`, `src/admin/csvUtils.js`.
 
-#### Admin Users tab
-- Logged-in admins can now perform full CRUD on the `admin_users` table from a new **Admin Users** tab in the dashboard.
-- Create: email + password (min 8 characters) with confirmation field.
-- Edit: email always editable; password field is optional (blank = keep existing hash).
-- Delete: blocked if the target is the currently logged-in account, or if it is the last remaining admin.
-- Server-side validation and bcrypt hashing on all write operations.
+### 0.1.4 (2026-06-29)
 
-#### Navigation overhaul
-- Replaced the sidebar with a single sticky horizontal navbar containing five hover-activated dropdown groups: Maths, English Language, Literature, Revision and Games.
-- Each group uses its own accent colour; the active item and group are highlighted.
-- Logo image added to the left of the GCSEPrep wordmark; clicking it returns to the home screen.
-
-#### Responsive / mobile design
-- **Mobile navigation drawer** — a hamburger button (☰) appears in the header on screens ≤ 768 px. Tapping it opens a slide-in drawer from the left listing all nav groups and their items with large touch-friendly tap targets. The drawer closes on item selection, on backdrop tap, or via the ✕ button.
-- **Exam board selector** — moved into the mobile drawer footer so the header stays uncluttered on small screens.
-- **Logo** — scales from 150 px to 72 px on mobile to prevent header overflow.
-- **Leaderboard** — Game and Date columns are hidden on mobile, keeping a clean Rank / Name / Score layout.
-- **Word Scramble** — display word font size reduced from `2.8 rem` to `2 rem` with tighter letter-spacing to prevent horizontal overflow on narrow viewports.
-- **Flashcard** — card height reduced from 280 px to 220 px on mobile.
-
-#### CSS formatting
-- `src/styles/main.css` reformatted so every CSS property declaration sits on its own line, making the stylesheet easier to read and edit during development. No style values were changed.
-
-#### Database
-- `database/backup_gcse.sql` made MySQL-compatible by removing MariaDB-specific conditional comment syntax (`/*M!999999\-...*/` and `/*M!100616...*/`), which caused a SQL 1064 parse error on plain MySQL imports.
-
----
+Admin password reset utility (`database/set_default_admin.sql`).
 
 ### 0.1.3
 - Improved menu and logo

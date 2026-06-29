@@ -5,8 +5,10 @@
  *              while the filter is active, since the visible list is a subset.
  */
 import { useState, useEffect, useRef } from 'react';
-import { fetchResource, createResource, updateResource, deleteResource } from '../../api/resources';
+import { fetchResource, createResource, updateResource, deleteResource, bulkImportResource } from '../../api/resources';
 import { arrayMove, persistOrder } from '../reorder';
+import CsvImportModal from '../CsvImportModal';
+import { downloadCsv, CSV_SCHEMAS } from '../csvUtils';
 
 const EMPTY = { slot: '', topic: '', question: '', answer: '', marks: 1, sort_order: 0 };
 
@@ -21,7 +23,8 @@ export default function QuestionsTab() {
     const [saving,  setSaving]  = useState(false);
     const [filter,  setFilter]  = useState('');
     const dragId = useRef(null);
-    const [overId,  setOverId]  = useState(null);
+    const [overId,    setOverId]    = useState(null);
+    const [csvModal,  setCsvModal]  = useState(false);
 
     useEffect(() => { load(); }, []);
 
@@ -66,6 +69,17 @@ export default function QuestionsTab() {
         setRows(await persistOrder('questions', next, toPayload));
     }
 
+    async function handleCsvImport(rows) {
+        const res = await bulkImportResource('questions', rows);
+        await load();
+        return res;
+    }
+
+    function handleCsvExport() {
+        const s = CSV_SCHEMAS.questions;
+        downloadCsv('questions.csv', s.columns, rows.map(s.prepareExport));
+    }
+
     const visible = filter
         ? rows.filter(r => r.topic.toLowerCase().includes(filter.toLowerCase()) || r.question.toLowerCase().includes(filter.toLowerCase()))
         : rows;
@@ -86,6 +100,8 @@ export default function QuestionsTab() {
                         onChange={e => setFilter(e.target.value)}
                         style={{ background: 'rgba(255,255,255,.06)', border: '1px solid var(--border)', borderRadius: 6, padding: '5px 10px', color: '#ccd6e0', fontSize: '.82rem', width: 220 }}
                     />
+                    <button className="btn-csv-export" onClick={handleCsvExport} disabled={!rows.length}><i className="fa-solid fa-download" /> Export CSV</button>
+                    <button className="btn-csv-import" onClick={() => setCsvModal(true)}><i className="fa-solid fa-upload" /> Import CSV</button>
                     <button className="btn-add" onClick={openAdd}>+ Add question</button>
                 </div>
             </div>
@@ -123,6 +139,14 @@ export default function QuestionsTab() {
                     </table>
                 )
             }
+
+            {csvModal && (
+                <CsvImportModal
+                    type="questions"
+                    onImport={handleCsvImport}
+                    onClose={() => setCsvModal(false)}
+                />
+            )}
 
             {modal && (
                 <div className="admin-modal-overlay" onClick={e => e.target === e.currentTarget && closeModal()}>

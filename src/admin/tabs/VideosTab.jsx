@@ -5,11 +5,13 @@
  *              an icon dropdown, an rgba colour picker and a rich text editor.
  */
 import { useState, useEffect, useRef } from 'react';
-import { fetchResource, createResource, updateResource, deleteResource } from '../../api/resources';
+import { fetchResource, createResource, updateResource, deleteResource, bulkImportResource } from '../../api/resources';
 import RichTextEditor from '../../components/RichTextEditor';
 import IconPicker from '../../components/IconPicker';
 import RgbaPicker from '../../components/RgbaPicker';
 import { arrayMove, persistOrder } from '../reorder';
+import CsvImportModal from '../CsvImportModal';
+import { downloadCsv, CSV_SCHEMAS } from '../csvUtils';
 
 const EMPTY = { subject: 'maths', name: '', icon: '', bg: '', url: '', description: '', topics: [], sort_order: 0 };
 
@@ -30,7 +32,8 @@ export default function VideosTab() {
     const [saving, setSaving] = useState(false);
     const [topicsText, setTopicsText] = useState('');
     const dragId = useRef(null);
-    const [overId, setOverId] = useState(null);
+    const [overId,   setOverId]   = useState(null);
+    const [csvModal, setCsvModal] = useState(false);
 
     useEffect(() => { load(); }, []);
 
@@ -72,6 +75,17 @@ export default function VideosTab() {
         setRows(await persistOrder('videos', next, toPayload));
     }
 
+    async function handleCsvImport(rows) {
+        const res = await bulkImportResource('videos', rows);
+        await load();
+        return res;
+    }
+
+    function handleCsvExport() {
+        const s = CSV_SCHEMAS.videos;
+        downloadCsv('videos.csv', s.columns, rows.map(s.prepareExport));
+    }
+
     return (
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -79,7 +93,11 @@ export default function VideosTab() {
                     <strong style={{ color: '#fff' }}>Video Channels</strong>
                     <span style={{ color: 'var(--slate)', marginLeft: 8, fontSize: '.82rem' }}>{rows.length} channels · drag rows to reorder</span>
                 </div>
-                <button className="btn-add" onClick={openAdd}>+ Add channel</button>
+                <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="btn-csv-export" onClick={handleCsvExport} disabled={!rows.length}><i className="fa-solid fa-download" /> Export CSV</button>
+                    <button className="btn-csv-import" onClick={() => setCsvModal(true)}><i className="fa-solid fa-upload" /> Import CSV</button>
+                    <button className="btn-add" onClick={openAdd}>+ Add channel</button>
+                </div>
             </div>
             {loading ? <p style={{ color: 'var(--slate)' }}>Loading…</p> : (
                 <table className="admin-table">
@@ -110,6 +128,14 @@ export default function VideosTab() {
                     </tbody>
                 </table>
             )}
+            {csvModal && (
+                <CsvImportModal
+                    type="videos"
+                    onImport={handleCsvImport}
+                    onClose={() => setCsvModal(false)}
+                />
+            )}
+
             {modal && (
                 <div className="admin-modal-overlay" onClick={e => e.target === e.currentTarget && close()}>
                     <div className="admin-modal">

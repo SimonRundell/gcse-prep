@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npx -y react-doctor@latest install)",
+      "Bash(npm run *)",
+      "Bash(php database/seed.php)",
+      "Bash(php -r ' *)",
+      "Bash(node -e \"console.log\\(require\\('/home/spr/Documents/gcse-prep/node_modules/@tiptap/react/package.json'\\).version\\)\")",
+      "Bash(php -l api/resources.php)",
+      "Bash(curl *)",
+      "Bash(npx -y react-doctor@latest --json --diff HEAD --yes)",
+      "Bash(echo \"exit=$?\")",
+      "Read(//tmp/**)",
+      "Bash(python3 *)",
+      "Bash(sed -n '70,72p;83,87p' src/admin/tabs/BlueprintTab.jsx)",
+      "Bash(sed -n '69,71p;82,87p' src/admin/tabs/WordsTab.jsx)",
+      "Bash(sed -n '96,98p' src/admin/tabs/QuestionsTab.jsx)",
+      "Bash(sed -n '85,87p;98,100p' src/admin/tabs/VideosTab.jsx)",
+      "Bash(grim /tmp/test-grim.png)",
+      "Bash(awk '{print $1, $2, $3}')",
+      "Bash(timeout 15 /usr/local/bin/flameshot full -p /tmp/test-flameshot.png)",
+      "Read(//usr/share/applications/**)",
+      "Read(//home/spr/Pictures/**)",
+      "Bash(sed -i '101,104s|<command>grim</command>|<command>flameshot gui</command>|' ~/.config/labwc/rc.xml)",
+      "Bash(labwc --reconfigure)",
+      "Bash(wl-paste --list-types)",
+      "Bash(wl-paste --type image/png)",
+      "Skill(claude-api)",
+      "Bash(php -l api/ai.php)",
+      "Bash(mysql *)"
+    ]
+  }
+}

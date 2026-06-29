@@ -5,9 +5,11 @@
  *              field uses a rich text editor.
  */
 import { useState, useEffect, useRef } from 'react';
-import { fetchResource, createResource, updateResource, deleteResource } from '../../api/resources';
+import { fetchResource, createResource, updateResource, deleteResource, bulkImportResource } from '../../api/resources';
 import RichTextEditor from '../../components/RichTextEditor';
 import { arrayMove, persistOrder } from '../reorder';
+import CsvImportModal from '../CsvImportModal';
+import { downloadCsv, CSV_SCHEMAS } from '../csvUtils';
 
 const EMPTY = { word: '', clue: '', subject: 'English', sort_order: 0 };
 
@@ -21,7 +23,8 @@ export default function WordsTab() {
     const [form,   setForm]   = useState(EMPTY);
     const [saving, setSaving] = useState(false);
     const dragId = useRef(null);
-    const [overId, setOverId] = useState(null);
+    const [overId,   setOverId]   = useState(null);
+    const [csvModal, setCsvModal] = useState(false);
 
     useEffect(() => { load(); }, []);
 
@@ -56,6 +59,17 @@ export default function WordsTab() {
         setRows(await persistOrder('words', next, toPayload));
     }
 
+    async function handleCsvImport(rows) {
+        const res = await bulkImportResource('words', rows);
+        await load();
+        return res;
+    }
+
+    function handleCsvExport() {
+        const s = CSV_SCHEMAS.words;
+        downloadCsv('words.csv', s.columns, rows.map(s.prepareExport));
+    }
+
     return (
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -63,7 +77,11 @@ export default function WordsTab() {
                     <strong style={{ color: '#fff' }}>Word Scramble Vocabulary</strong>
                     <span style={{ color: 'var(--slate)', marginLeft: 8, fontSize: '.82rem' }}>{rows.length} words · drag rows to reorder</span>
                 </div>
-                <button className="btn-add" onClick={openAdd}>+ Add word</button>
+                <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="btn-csv-export" onClick={handleCsvExport} disabled={!rows.length}><i className="fa-solid fa-download" /> Export CSV</button>
+                    <button className="btn-csv-import" onClick={() => setCsvModal(true)}><i className="fa-solid fa-upload" /> Import CSV</button>
+                    <button className="btn-add" onClick={openAdd}>+ Add word</button>
+                </div>
             </div>
             {loading ? <p style={{ color: 'var(--slate)' }}>Loading…</p> : (
                 <table className="admin-table">
@@ -93,6 +111,14 @@ export default function WordsTab() {
                     </tbody>
                 </table>
             )}
+            {csvModal && (
+                <CsvImportModal
+                    type="words"
+                    onImport={handleCsvImport}
+                    onClose={() => setCsvModal(false)}
+                />
+            )}
+
             {modal && (
                 <div className="admin-modal-overlay" onClick={e => e.target === e.currentTarget && close()}>
                     <div className="admin-modal">

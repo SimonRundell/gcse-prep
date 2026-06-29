@@ -1,0 +1,13 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ /index.html [L]
+</IfModule>
+
+# Fallback for servers where mod_rewrite is disabled (e.g. Hostinger LiteSpeed).
+# React loads index.html and handles the route client-side.
+# The browser still renders the correct page; only the HTTP status differs.
+ErrorDocument 404 /index.html

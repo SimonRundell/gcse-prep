@@ -38,6 +38,144 @@ function db(): PDO {
     return $pdo;
 }
 
+/**
+ * Handle a bulk CSV import for a given resource type.
+ * Questions always insert; words upsert on word+subject; videos upsert on url;
+ * blueprint upserts on q_ref.
+ *
+ * @param string $type
+ * @param array  $rows   Array of associative arrays (one per CSV row).
+ * @param PDO    $pdo
+ * @return array { inserted: int, updated: int, errors: string[] }
+ */
+function handleBulkImport(string $type, array $rows, PDO $pdo): array {
+    $inserted = 0;
+    $updated  = 0;
+    $errors   = [];
+
+    switch ($type) {
+        case 'questions':
+            $ins = $pdo->prepare(
+                'INSERT INTO question_bank (slot, topic, question, answer, marks, sort_order) VALUES (?, ?, ?, ?, ?, 0)'
+            );
+            foreach ($rows as $i => $row) {
+                try {
+                    $ins->execute([
+                        trim($row['slot']     ?? ''),
+                        trim($row['topic']    ?? ''),
+                        trim($row['question'] ?? ''),
+                        trim($row['answer']   ?? ''),
+                        (int)($row['marks']   ?? 1),
+                    ]);
+                    $inserted++;
+                } catch (Exception $e) {
+                    $errors[] = 'Row ' . ($i + 2) . ': ' . $e->getMessage();
+                }
+            }
+            break;
+
+        case 'words':
+            $find = $pdo->prepare('SELECT id FROM words WHERE word = ? AND subject = ? LIMIT 1');
+            $ins  = $pdo->prepare('INSERT INTO words (word, clue, subject, sort_order) VALUES (?, ?, ?, 0)');
+            $upd  = $pdo->prepare('UPDATE words SET clue = ? WHERE id = ?');
+            foreach ($rows as $i => $row) {
+                try {
+                    $find->execute([trim($row['word'] ?? ''), trim($row['subject'] ?? '')]);
+                    $existing = $find->fetch();
+                    if ($existing) {
+                        $upd->execute([trim($row['clue'] ?? ''), $existing['id']]);
+                        $updated++;
+                    } else {
+                        $ins->execute([trim($row['word'] ?? ''), trim($row['clue'] ?? ''), trim($row['subject'] ?? '')]);
+                        $inserted++;
+                    }
+                } catch (Exception $e) {
+                    $errors[] = 'Row ' . ($i + 2) . ': ' . $e->getMessage();
+                }
+            }
+            break;
+
+        case 'videos':
+            $find = $pdo->prepare('SELECT id FROM video_channels WHERE url = ? LIMIT 1');
+            $ins  = $pdo->prepare(
+                'INSERT INTO video_channels (subject, name, icon, bg, url, description, topics, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, 0)'
+            );
+            $upd  = $pdo->prepare(
+                'UPDATE video_channels SET subject = ?, name = ?, icon = ?, bg = ?, description = ?, topics = ? WHERE id = ?'
+            );
+            foreach ($rows as $i => $row) {
+                try {
+                    $url        = trim($row['url'] ?? '');
+                    $topicsJson = json_encode($row['topics'] ?? [], JSON_UNESCAPED_UNICODE);
+                    $find->execute([$url]);
+                    $existing = $find->fetch();
+                    if ($existing) {
+                        $upd->execute([
+                            trim($row['subject']     ?? ''),
+                            trim($row['name']        ?? ''),
+                            trim($row['icon']        ?? ''),
+                            trim($row['bg']          ?? ''),
+                            trim($row['description'] ?? ''),
+                            $topicsJson,
+                            $existing['id'],
+                        ]);
+                        $updated++;
+                    } else {
+                        $ins->execute([
+                            trim($row['subject']     ?? ''),
+                            trim($row['name']        ?? ''),
+                            trim($row['icon']        ?? ''),
+                            trim($row['bg']          ?? ''),
+                            $url,
+                            trim($row['description'] ?? ''),
+                            $topicsJson,
+                        ]);
+                        $inserted++;
+                    }
+                } catch (Exception $e) {
+                    $errors[] = 'Row ' . ($i + 2) . ': ' . $e->getMessage();
+                }
+            }
+            break;
+
+        case 'blueprint':
+            $find = $pdo->prepare('SELECT id FROM blueprint WHERE q_ref = ? LIMIT 1');
+            $ins  = $pdo->prepare('INSERT INTO blueprint (q_ref, topic, style, marks, sort_order) VALUES (?, ?, ?, ?, 0)');
+            $upd  = $pdo->prepare('UPDATE blueprint SET topic = ?, style = ?, marks = ? WHERE id = ?');
+            foreach ($rows as $i => $row) {
+                try {
+                    $find->execute([trim($row['q_ref'] ?? '')]);
+                    $existing = $find->fetch();
+                    if ($existing) {
+                        $upd->execute([
+                            trim($row['topic'] ?? ''),
+                            trim($row['style'] ?? ''),
+                            (int)($row['marks'] ?? 1),
+                            $existing['id'],
+                        ]);
+                        $updated++;
+                    } else {
+                        $ins->execute([
+                            trim($row['q_ref']  ?? ''),
+                            trim($row['topic']  ?? ''),
+                            trim($row['style']  ?? ''),
+                            (int)($row['marks'] ?? 1),
+                        ]);
+                        $inserted++;
+                    }
+                } catch (Exception $e) {
+                    $errors[] = 'Row ' . ($i + 2) . ': ' . $e->getMessage();
+                }
+            }
+            break;
+
+        default:
+            return ['inserted' => 0, 'updated' => 0, 'errors' => ['Bulk import is not supported for this resource type']];
+    }
+
+    return compact('inserted', 'updated', 'errors');
+}
+
 function requireAuth(): void {
     if (empty($_SESSION['admin_logged_in'])) {
         http_response_code(401);
@@ -58,6 +196,20 @@ $id     = isset($_GET['id']) ? (int)$_GET['id'] : null;
 $body   = ($method !== 'GET') ? json_decode(file_get_contents('php://input'), true) ?? [] : [];
 
 // ----------------------------------------------------------------
+// Bulk CSV import (POST with action=bulk_import, handled before the type switch)
+// ----------------------------------------------------------------
+if ($method === 'POST' && ($body['action'] ?? '') === 'bulk_import') {
+    requireAuth();
+    $rows = $body['rows'] ?? [];
+    if (!is_array($rows) || count($rows) === 0) {
+        http_response_code(400);
+        echo json_encode(['error' => 'rows must be a non-empty array']);
+        exit;
+    }
+    echo json_encode(handleBulkImport($type, $rows, db()));
+    exit;
+}
+
 try {
     switch ($type) {
 
