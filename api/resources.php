@@ -9,7 +9,7 @@
  *
  *   Types: questions | words | videos | blueprint | boards
  *
- * Copyright (c) 2026 Becky Hingston & Simon Rundell, Exeter College Faculty of ITDD
+ * Copyright (c) 2026 Becky Hingston & Simon Rundell, Exeter College Faculty of Cybersecurity and Digital Technologies
  * Creative Commons NC-BY-SA 4.0
  */
 

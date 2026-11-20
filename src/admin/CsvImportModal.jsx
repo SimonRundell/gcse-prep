@@ -12,7 +12,7 @@
  *                                   returns { inserted, updated, errors }.
  * @param {function} props.onClose   Called when the modal should close.
  *
- * Copyright (c) 2026 Becky Hingston & Simon Rundell, Exeter College Faculty of ITDD
+ * Copyright (c) 2026 Becky Hingston & Simon Rundell, Exeter College Faculty of Cybersecurity and Digital Technologies
  * Creative Commons NC-BY-SA 4.0
  */
 import { useState, useRef } from 'react';

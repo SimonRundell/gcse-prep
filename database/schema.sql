@@ -1,5 +1,5 @@
 -- GCSEPrep database schema
--- Copyright (c) 2026 Becky Hingston & Simon Rundell, Exeter College Faculty of ITDD
+-- Copyright (c) 2026 Becky Hingston & Simon Rundell, Exeter College Faculty of Cybersecurity and Digital Technologies
 -- Creative Commons NC-BY-SA 4.0
 
 CREATE DATABASE IF NOT EXISTS gcse_prep CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

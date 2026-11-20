@@ -4,7 +4,7 @@ An AI-powered GCSE revision app for **Maths, English Language and English Litera
 
 Built with React 18 + Vite 6 + PHP + MySQL. Questions are generated and marked by an AI provider of your choice (Anthropic Claude by default, or any OpenAI-compatible endpoint); all content data is stored in MySQL and editable through a built-in admin panel.
 
-> Created by Becky Hingston and Simon Rundell, Exeter College Faculty of ITDD.
+> Created by Becky Hingston and Simon Rundell, Exeter College Faculty of Cybersecurity and Digital Technologies.
 
 ---
 
@@ -366,7 +366,7 @@ All questions in the question bank are original. The Real Paper Mode and Questio
 
 ## License
 
-Copyright (c) 2026 Becky Hingston and Simon Rundell, Exeter College Faculty of ITDD
+Copyright (c) 2026 Becky Hingston and Simon Rundell, Exeter College Faculty of Cybersecurity and Digital Technologies
 
 This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License (CC BY-NC-SA 4.0). See [LICENSE](LICENSE).
 
@@ -375,7 +375,7 @@ You are free to:
 - **Adapt** — remix, transform, and build upon the material
 
 Under the following terms:
-- **Attribution** — You must give appropriate credit to the original authors (Becky Hingston and Simon Rundell, Exeter College Faculty of ITDD), provide a link to the licence, and indicate if changes were made.
+- **Attribution** — You must give appropriate credit to the original authors (Becky Hingston and Simon Rundell, Exeter College Faculty of Cybersecurity and Digital Technologies), provide a link to the licence, and indicate if changes were made.
 - **NonCommercial** — You may not use the material for commercial purposes.
 - **ShareAlike** — If you remix, transform, or build upon the material, you must distribute your contributions under the same licence as the original.
 
